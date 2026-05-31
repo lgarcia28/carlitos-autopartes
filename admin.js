@@ -88,19 +88,22 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     const userEmail = user.email ? user.email.toLowerCase().trim() : "";
     
-    // 🛡️ Verify if the user is in the Authorized Allowlist
-    if (CORREOS_AUTORIZADOS.map(email => email.toLowerCase().trim()).includes(userEmail)) {
+    // 🛡️ Verify if the user is in the Authorized Allowlist or has the admin domain suffix
+    const isAllowed = CORREOS_AUTORIZADOS.map(email => email.toLowerCase().trim()).includes(userEmail) ||
+                      userEmail.endsWith("@carlitosautopartes.com");
+    
+    if (isAllowed) {
       // Access Granted!
       loginView.style.display = "none";
       adminView.style.display = "block";
-      userEmailTag.textContent = user.email;
+      userEmailTag.textContent = user.email.split("@")[0]; // Muestra el nombre de usuario limpio
       
       // Subscribe to Firestore catalog updates
       subscribeToCatalog();
     } else {
       // Access Denied!
       signOut(auth);
-      showToast("Acceso denegado: este correo electrónico no está autorizado.", "error");
+      showToast("Acceso denegado: este usuario no está autorizado.", "error");
     }
   } else {
     // Admin is logged out
