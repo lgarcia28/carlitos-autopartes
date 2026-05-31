@@ -372,6 +372,10 @@
   <script>
     // Captura errores globales de sintaxis o de importación de scripts/módulos
     window.addEventListener('error', function(e) {
+      // Ignorar errores inofensivos de recursos como imágenes que tardan o favicons faltantes (evita falsas alarmas)
+      if (e.target && e.target.tagName && e.target.tagName !== 'SCRIPT') {
+        return;
+      }
       document.getElementById('diagnostico-error-box').style.display = 'block';
       const msg = e.message || 'Error de carga/importación de recurso (ej. Firebase CDN)';
       const source = e.filename ? ('\nArchivo: ' + e.filename + '\nLínea: ' + e.lineno) : '';
