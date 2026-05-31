@@ -1,0 +1,22 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Firebase
+.firebase/
+firebase-debug.log
+*firebase-debug.log*
+
+# Node / Dependencies (if any are added later)
+node_modules/
+package-lock.json
+npm-debug.log*

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>Accesorios Autocentro S.R.L. | Tienda de Autopartes en Rosario</title>
+  <meta name="description" content="E-commerce premium de Accesorios Autocentro S.R.L. en Rosario, Argentina. Faros, ópticas, espejos, levantacristales, cerraduras, manijas, volantes deportivos y tazas. Corrientes 579.">
+  <meta name="keywords" content="autopartes, accesorios de autos, faros, ópticas, espejos, levantacristales, volantes deportivos, tazas, rosario, corrientes 579, repuestos">
+  <meta name="author" content="Accesorios Autocentro S.R.L.">
+  
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:title" content="Accesorios Autocentro S.R.L. | Autopartes & Accesorios">
+  <meta property="og:description" content="Encuentra las mejores tazas, molduras, volantes deportivos, levantacristales y ópticas en Rosario. Retira por Corrientes 579.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Facade Stripe Accent Header Decorator -->
+  <div class="accent-line-top" aria-hidden="true"></div>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <!-- Brand Logo & Store details -->
+      <a href="index.html" class="brand-wrapper" id="brand-link" aria-label="Ir al inicio de Accesorios Autocentro">
+        <div class="brand-logo-circle" aria-hidden="true">AC</div>
+        <div class="brand-details">
+          <h1>Accesorios Autocentro</h1>
+          <div class="store-address">
+            <!-- Map Pin SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+            <span>Corrientes 579, Rosario</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Instant Search Filter -->
+      <div class="header-search-wrapper">
+        <search>
+          <form class="search-form" id="search-form" onsubmit="event.preventDefault();">
+            <label for="search-input" class="visual-hide" style="display: none;">Buscar autopartes...</label>
+            <input 
+              type="search" 
+              id="search-input" 
+              class="search-input" 
+              placeholder="Buscar por ópticas, espejos, manijas, volantes..." 
+              autocomplete="off"
+            >
+            <button type="submit" class="search-icon-btn" aria-label="Buscar">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </button>
+          </form>
+        </search>
+      </div>
+
+      <!-- Action Items: Shopping Cart Toggle Button -->
+      <div class="header-actions">
+        <!-- Declarative Invoker to Open Cart Dialog Modal -->
+        <button 
+          class="cart-toggle-btn" 
+          id="cart-toggle-btn" 
+          commandfor="cart-drawer" 
+          command="show-modal"
+          aria-label="Abrir carrito de compras"
+        >
+          <!-- Cart Icon SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+          </svg>
+          <span class="cart-badge" id="cart-badge-count">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- INTRODUCTORY HERO COVER (Shaded storefront facade image) -->
+  <section class="intro-hero" id="intro-hero">
+    <div class="intro-hero-content">
+      <span class="intro-badge">Equipamiento del Automóvil</span>
+      <h2>Conocé Accesorios Autocentro</h2>
+      <p class="intro-description">
+        Con más de 30 años de trayectoria comercial en Rosario, equipamos tu auto con repuestos originales y nacionales de máxima calidad. Especialistas en faros, ópticas, espejos, levantacristales, cerraduras, manijas, volantes deportivos y tazas. Te ofrecemos asesoramiento experto y calidez en la atención en nuestro local ubicado en pleno centro de la ciudad.
+      </p>
+      <div class="intro-cta-wrapper">
+        <a href="#storefront" class="intro-primary-btn">
+          <span>Ver Catálogo Online</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+          </svg>
+        </a>
+        <a href="#ubicacion" class="intro-secondary-btn">
+          <span>Cómo llegar</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFINITE BRAND LOGOS TICKER MARQUEE -->
+  <section class="brand-ticker-section" aria-label="Marcas con las que trabajamos">
+    <div class="ticker-label">Marcas que trabajamos:</div>
+    <div class="brand-ticker-container">
+      <div class="brand-ticker-track">
+        <!-- List of brands replicated to allow seamless loop -->
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/toyota.svg" alt="Toyota">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/ford.svg" alt="Ford">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/volkswagen.svg" alt="Volkswagen">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/peugeot.svg" alt="Peugeot">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/chevrolet.svg" alt="Chevrolet">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/fiat.svg" alt="Fiat">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/renault.svg" alt="Renault">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/mercedes.svg" alt="Mercedes-Benz">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/honda.svg" alt="Honda">
+        <!-- Duplicated items for infinite scroll -->
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/toyota.svg" alt="Toyota">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/ford.svg" alt="Ford">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/volkswagen.svg" alt="Volkswagen">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/peugeot.svg" alt="Peugeot">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/chevrolet.svg" alt="Chevrolet">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/fiat.svg" alt="Fiat">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/renault.svg" alt="Renault">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/mercedes.svg" alt="Mercedes-Benz">
+        <img class="brand-logo-img" src="https://unpkg.com/simple-icons@v11/icons/honda.svg" alt="Honda">
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN STOREFRONT WRAPPER -->
+  <main class="main-container" id="storefront">
+    
+    <!-- Hero Info Banner (Dynamic store highlights) -->
+    <section class="hero-banner" id="hero-banner">
+      <div class="hero-facade-stripe" aria-hidden="true"></div>
+      <div class="hero-body">
+        <div class="hero-text">
+          <h2>Catálogo de Repuestos</h2>
+          <p>Buscá repuestos originales por categoría y marca. Retirá hoy mismo por Corrientes 579, Rosario.</p>
+        </div>
+        <span class="hero-tag">Corrientes 579</span>
+      </div>
+    </section>
+
+    <!-- SIDEBAR CATEGORIES FILTERS -->
+    <aside class="filter-sidebar">
+      <nav aria-label="Filtrar por categoría">
+        <h3 class="filter-section-title">Categorías</h3>
+        <ul class="category-list" id="category-list">
+          <li>
+            <button class="category-btn active" data-category="Todos">
+              <span>Todos los Productos</span>
+              <span class="category-count" id="count-Todos">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="category-btn" data-category="Faros y Ópticas">
+              <span>Faros y Ópticas</span>
+              <span class="category-count" id="count-Faros-Opticas">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="category-btn" data-category="Espejos y Levantacristales">
+              <span>Espejos y Cristales</span>
+              <span class="category-count" id="count-Espejos-Cristales">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="category-btn" data-category="Manijas y Cerraduras">
+              <span>Manijas y Cerraduras</span>
+              <span class="category-count" id="count-Manijas-Cerraduras">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="category-btn" data-category="Volantes Deportivos y Accesorios">
+              <span>Volantes y Accesorios</span>
+              <span class="category-count" id="count-Volantes-Accesorios">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="category-btn" data-category="Tazas y Molduras">
+              <span>Tazas y Molduras</span>
+              <span class="category-count" id="count-Tazas-Molduras">0</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Physical Store Card Contextual -->
+      <div class="store-info-card" id="store-info-card">
+        <strong>Retiro en Local</strong>
+        <p>Hacé tu pedido online por WhatsApp y retirá hoy mismo por nuestra sucursal comercial en Corrientes 579, Rosario.</p>
+      </div>
+    </aside>
+
+    <!-- PRODUCT DISPLAY AREA -->
+    <section class="products-display" aria-label="Catálogo de repuestos">
+      
+      <!-- Combined Filters Bar (Category, Search, Brand Dropdown) -->
+      <div class="store-filters-bar">
+        <div class="hierarchical-filters-wrapper">
+          <div class="filter-item">
+            <label for="brand-filter" class="filter-label">Marca:</label>
+            <select id="brand-filter" class="filter-select">
+              <option value="Todas">Todas las marcas</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="model-filter" class="filter-label">Modelo:</label>
+            <select id="model-filter" class="filter-select" disabled>
+              <option value="Todos">Todos los modelos</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="year-filter" class="filter-label">Año:</label>
+            <select id="year-filter" class="filter-select" disabled>
+              <option value="Todos">Todos los años</option>
+            </select>
+          </div>
+        </div>
+        <div class="results-meta">
+          <span class="results-count" id="results-count">Mostrando 15 productos</span>
+        </div>
+      </div>
+
+      <!-- Display Title Header -->
+      <div class="display-header">
+        <h3 id="current-category-title">Todos los Productos</h3>
+      </div>
+
+      <!-- Grid -->
+      <div class="product-grid" id="product-grid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- INTERACTIVE GOOGLE MAPS & CONTACT SECTION -->
+  <section class="location-section" id="ubicacion">
+    <div class="location-container">
+      <div class="location-details">
+        <span class="location-badge">Nuestra Ubicación</span>
+        <h3>Vení a conocernos en Rosario</h3>
+        <p class="location-text">
+          Estamos en pleno centro de la ciudad de Rosario, Santa Fe. Ubicados en **Corrientes 579** (entre San Lorenzo y Urquiza). Podés acercarte a retirar tus compras directamente por nuestro local comercial.
+        </p>
+        <div class="location-info-list">
+          <div class="info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+            <div>
+              <strong>Dirección Comercial</strong>
+              <span>Corrientes 579, Rosario, Santa Fe</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <div>
+              <strong>Horarios de Atención</strong>
+              <span>Lun a Vie: 8:30 a 12:30 y 14:30 a 18:30 | Sáb: 9:00 a 13:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="location-map">
+        <!-- Responsive Google Maps Embed -->
+        <iframe 
+          title="Ubicación de Accesorios Autocentro en Google Maps"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3348.188735398299!2d-60.64295328481358!3d-32.9460592809223!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b7ab1dfa8bdfd7%3A0x6b13cfb2e67615bc!2sCorrientes%20579%2C%20S2000CGG%20Rosario%2C%20Santa%20Fe!5e0!3m2!1ses-419!2sar!4v1717171717171!5m2!1ses-419!2sar"
+          width="100%" 
+          height="100%" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOPPING CART DRAWER (Native dialog overlay modal) -->
+  <dialog class="cart-drawer" id="cart-drawer" aria-labelledby="cart-title">
+    
+    <!-- Drawer Header -->
+    <div class="cart-header">
+      <h2 id="cart-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        </svg>
+        <span>Mi Pedido</span>
+      </h2>
+      <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+        <button 
+          class="clear-cart-btn" 
+          id="clear-cart-btn" 
+          aria-label="Vaciar todo el carrito"
+        >
+          Vaciar
+        </button>
+        <!-- Declarative button to Close Cart Dialog Modal -->
+        <button 
+          class="close-drawer-btn" 
+          id="close-drawer-btn" 
+          commandfor="cart-drawer" 
+          command="close" 
+          aria-label="Cerrar pedido"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Items Container -->
+    <div class="cart-items-container" id="cart-items">
+      <!-- Rendered dynamically by app.js -->
+    </div>
+
+    <!-- Sticky Footer Summary & Checkout Actions -->
+    <div class="cart-footer">
+      <div class="cart-totals">
+        <div class="cart-total-row">
+          <span>Subtotal</span>
+          <span id="cart-subtotal">$0</span>
+        </div>
+        <div class="cart-total-row">
+          <span>Retiro en Corrientes 579</span>
+          <span style="color: #25D366; font-weight: 600;">GRATIS</span>
+        </div>
+        <div class="cart-total-row grand-total">
+          <span>Total del Pedido</span>
+          <span id="cart-grand-total">$0</span>
+        </div>
+      </div>
+      
+      <!-- Checkout Button: Finalizar Pedido por WhatsApp -->
+      <button class="checkout-btn" id="checkout-btn" disabled>
+        <!-- WhatsApp Icon SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+          <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+        </svg>
+        <span>Finalizar Pedido por WhatsApp</span>
+      </button>
+
+      <!-- Keep Shopping Button to close Dialog Modal -->
+      <button 
+        class="keep-shopping-btn" 
+        id="keep-shopping-btn" 
+        commandfor="cart-drawer" 
+        command="close"
+        aria-label="Seguir comprando y cerrar el carrito"
+      >
+        Seguir Comprando
+      </button>
+    </div>
+
+  </dialog>
+
+  <!-- FIXED FLOATING WHATSAPP ICON (derive to negocio WhatsApp) -->
+  <a 
+    href="https://wa.me/5493416055274" 
+    class="wsp-floating-btn" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    aria-label="Contactar a Accesorios Autocentro por WhatsApp"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+      <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+    </svg>
+  </a>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      
+      <!-- Logo and Description Column -->
+      <div class="footer-col">
+        <h4 class="font-display">Accesorios Autocentro</h4>
+        <p>Tu local de confianza para el cuidado y equipamiento de tu auto. Ofrecemos el catálogo más amplio de Rosario en tazas, molduras, levantacristales y ópticas nacionales e importados.</p>
+      </div>
+
+      <!-- Links Column -->
+      <div class="footer-col">
+        <h4>Categorías</h4>
+        <ul>
+          <li><a href="#" data-footer-category="Faros y Ópticas">Faros y Ópticas</a></li>
+          <li><a href="#" data-footer-category="Espejos y Levantacristales">Espejos y Levantacristales</a></li>
+          <li><a href="#" data-footer-category="Manijas y Cerraduras">Manijas y Cerraduras</a></li>
+          <li><a href="#" data-footer-category="Volantes Deportivos y Accesorios">Volantes y Accesorios</a></li>
+          <li><a href="#" data-footer-category="Tazas y Molduras">Tazas y Molduras</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Column -->
+      <div class="footer-col">
+        <h4>Contacto & Horarios</h4>
+        <p>
+          <strong>Dirección:</strong> Corrientes 579, Rosario, Santa Fe<br>
+          <strong>WhatsApp:</strong> +54 9 341 605-5274<br>
+          <strong>Horarios:</strong><br>
+          Lunes a Viernes: 8:30 a 12:30 y 14:30 a 18:30<br>
+          Sábados: 9:00 a 13:00
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <p>&copy; 2026 Accesorios Autocentro S.R.L. Todos los derechos reservados. Rosario, Argentina.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts Connection -->
+  <script src="products.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
