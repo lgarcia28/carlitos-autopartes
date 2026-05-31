@@ -1483,6 +1483,11 @@ footer.app-footer {
     gap: var(--spacing-md);
   }
 
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+
   .hero-banner {
     grid-column: span 1;
   }
@@ -1597,7 +1602,41 @@ footer.app-footer {
   }
 
   /* --- INTRO HERO: Hidden on mobile to prioritize catalog --- */
+  /* --- INTRO HERO: Compact mobile cover showing storefront --- */
   .intro-hero {
+    display: flex !important;
+    min-block-size: 160px !important; /* Very short height to keep it clean */
+    padding: var(--spacing-md) var(--spacing-sm) !important;
+    background-image: linear-gradient(rgba(11, 37, 69, 0.75), rgba(11, 37, 69, 0.75)), url('./IMG_1752.jpg') !important;
+    background-size: cover !important;
+    background-position: center 30% !important;
+  }
+
+  .intro-hero-content {
+    gap: 6px !important;
+  }
+
+  .intro-hero .intro-badge {
+    display: none !important;
+  }
+
+  .intro-hero h2 {
+    font-size: 1.35rem !important;
+    color: #FFFFFF !important;
+  }
+
+  .intro-hero .intro-description {
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .intro-hero .intro-cta-wrapper {
     display: none !important;
   }
 
@@ -1691,8 +1730,10 @@ footer.app-footer {
 
   .product-img-wrapper {
     aspect-ratio: 1 / 1 !important;
+    max-height: 110px !important; /* Strict height limit to shrink photo size */
     padding: 8px !important;
     background-color: #FFFFFF !important;
+    margin: 0 auto !important; /* Horizontally centered in grid cell */
   }
 
   .product-img {
