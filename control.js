@@ -658,6 +658,14 @@ function renderSeedMigrationOffer() {
     } catch (err) {
       console.error("Error al migrar catálogo:", err);
       showToast("Error subiendo datos muestra a Firestore.", "error");
+      
+      // Mostrar el error técnico exacto en la caja de diagnóstico para soporte técnico
+      const diagBox = document.getElementById("diagnostico-error-box");
+      const diagContent = document.getElementById("diagnostico-error-content");
+      if (diagBox && diagContent) {
+        diagBox.style.display = "block";
+        diagContent.textContent += `\n[ERROR DE MIGRACIÓN] ${err.message || err.code || err}\n${err.stack ? err.stack : ''}`;
+      }
     }
   });
 }
