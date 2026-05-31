@@ -97,6 +97,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- EVENT LISTENERS REGISTRATION ---
   function bindEventListeners() {
+    // Mobile Filters Toggle Button Click Handler
+    const filterToggle = document.getElementById("mobile-filter-toggle");
+    const sidebar = document.querySelector("aside.filter-sidebar");
+    const filtersBar = document.querySelector(".store-filters-bar");
+    
+    if (filterToggle && sidebar && filtersBar) {
+      filterToggle.addEventListener("click", () => {
+        const isOpen = sidebar.classList.toggle("mobile-open");
+        filtersBar.classList.toggle("mobile-open");
+        filterToggle.classList.toggle("active");
+        filterToggle.setAttribute("aria-expanded", isOpen);
+      });
+    }
+
     // A. Category Side-Menu Filtering
     categoryList.addEventListener("click", (e) => {
       const button = e.target.closest(".category-btn");

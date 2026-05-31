@@ -660,6 +660,10 @@ aside.filter-sidebar {
   overflow: hidden;
 }
 
+.mobile-filter-toggle-btn {
+  display: none; /* Hidden on PC */
+}
+
 /* NEW: Combined Filters Bar (Dropdown Brand Filter) */
 .store-filters-bar {
   background-color: var(--bg-surface);
@@ -1530,8 +1534,8 @@ footer.app-footer {
   }
 
   .category-btn.active {
-    background-color: var(--brand-blue) !important;
-    border-color: var(--brand-blue) !important;
+    background-color: var(--primary-navy) !important;
+    border-color: var(--primary-navy) !important;
     color: #FFFFFF !important;
   }
 
@@ -1640,21 +1644,82 @@ footer.app-footer {
     display: none !important;
   }
 
-  /* --- STICKY CATEGORIES BAR: Pins horizontally on mobile scrolling --- */
+  /* --- MOBILE COLLAPSIBLE FILTERS & CATEGORIES --- */
+  .mobile-filter-toggle-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background-color: var(--primary-navy) !important;
+    color: var(--accent-yellow) !important;
+    border: 2px solid var(--accent-yellow) !important;
+    padding: 12px 16px !important;
+    border-radius: var(--radius-md) !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    margin-bottom: var(--spacing-md) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .mobile-filter-toggle-btn:hover,
+  .mobile-filter-toggle-btn:active {
+    background-color: var(--secondary-navy) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  .mobile-filter-toggle-btn .toggle-icon {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: var(--accent-yellow) !important;
+    transition: transform 0.3s ease !important;
+  }
+
+  .mobile-filter-toggle-btn.active .toggle-icon {
+    transform: rotate(180deg) !important;
+  }
+
+  /* Collapsed by default on mobile */
   aside.filter-sidebar {
-    position: sticky !important;
-    top: 66px !important; /* Positions perfectly below the glassmorphism header */
-    z-index: 999 !important;
+    display: none !important;
+  }
+
+  .store-filters-bar {
+    display: none !important;
+  }
+
+  /* Expanded when mobile-open is active (statically placed, no sticky overlaps!) */
+  aside.filter-sidebar.mobile-open {
+    display: block !important;
+    position: static !important;
+    margin: 0 0 var(--spacing-md) 0 !important;
+    padding: 12px 16px !important;
     background-color: var(--bg-surface) !important;
-    padding: 8px 16px !important;
-    margin: -16px -16px 12px -16px !important;
-    border-radius: 0 !important;
-    border-bottom: 1px solid var(--border-light) !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--border-light) !important;
+    box-shadow: var(--shadow-sm) !important;
+    width: 100% !important;
+    z-index: auto !important;
   }
 
   aside.filter-sidebar .filter-section-title {
-    display: none !important; /* Save vital vertical viewport space */
+    display: none !important; /* Save vital vertical space */
+  }
+
+  .store-filters-bar.mobile-open {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--spacing-sm) !important;
+    padding: var(--spacing-md) !important;
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: var(--spacing-md) !important;
   }
 
   /* --- BRAND TICKER: Full width, no label --- */
@@ -1674,14 +1739,7 @@ footer.app-footer {
     gap: var(--spacing-lg);
   }
 
-  /* --- FILTERS BAR: Full-width stacked --- */
-  .store-filters-bar {
-    padding: var(--spacing-md);
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-sm);
-  }
-
+  /* Stacked Selector Filters inside open bar */
   .hierarchical-filters-wrapper {
     display: flex;
     flex-direction: column;
@@ -1718,10 +1776,17 @@ footer.app-footer {
     font-size: 0.85rem;
   }
 
-  /* --- PRODUCT GRID: 2-Column Mercado Libre layout for mobile --- */
+  /* --- PRODUCT GRID: Dynamic Columns (2 Portrait, 3 Landscape/Tablet) --- */
   .product-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
+  }
+
+  @media (min-width: 480px) {
+    .product-grid {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 10px !important;
+    }
   }
 
   .product-card {
