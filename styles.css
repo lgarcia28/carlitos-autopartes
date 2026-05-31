@@ -1720,33 +1720,37 @@ footer.app-footer {
     display: none !important; /* Save vital vertical space */
   }
 
-  /* Premium horizontal scroll category pills on mobile */
+  /* Premium responsive grid categories on mobile (no scrolling, immediately visible!) */
   aside.filter-sidebar.mobile-open .category-list {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: var(--spacing-sm) !important;
-    overflow-x: auto !important;
-    padding-bottom: 2px !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    overflow-x: visible !important;
+    padding-bottom: 0 !important;
   }
 
-  aside.filter-sidebar.mobile-open .category-list::-webkit-scrollbar {
-    display: none !important;
+  aside.filter-sidebar.mobile-open .category-list li {
+    list-style: none !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   aside.filter-sidebar.mobile-open .category-btn {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    padding: 8px 14px !important;
-    font-size: 0.8rem !important;
+    white-space: normal !important; /* Allow text wrapping for long names */
+    padding: 10px 8px !important;
+    font-size: 0.76rem !important;
     background-color: #FFFFFF !important;
     border: 1px solid #dcdcdc !important;
-    border-radius: var(--radius-full) !important;
+    border-radius: var(--radius-md) !important; /* Elegant card look */
     color: #333333 !important;
     display: flex !important;
+    flex-direction: column !important; /* Stack text and badge vertically for visual excellence! */
     align-items: center !important;
-    gap: 6px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 4px !important;
+    height: 100% !important;
+    min-height: 58px !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
     transition: all 0.2s ease !important;
   }
@@ -1755,11 +1759,11 @@ footer.app-footer {
     background-color: var(--primary-navy) !important;
     border-color: var(--primary-navy) !important;
     color: #FFFFFF !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
   }
 
   aside.filter-sidebar.mobile-open .category-count {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
     background-color: var(--bg-surface-low) !important;
     color: var(--text-secondary) !important;
     padding: 1px 6px !important;
@@ -1994,11 +1998,14 @@ footer.app-footer {
   }
 }
 
-/* ===== MOBILE LANDSCAPE & SMALL TABLETS OVERRIDE (flat, top-level for 100% Safari compatibility) ===== */
 @media (min-width: 480px) and (max-width: 768px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-list {
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }
 
