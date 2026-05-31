@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getAuth, 
-  signInWithEmailAndPassword, 
+  GoogleAuthProvider,
+  signInWithPopup, 
   signOut, 
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -14,7 +15,6 @@ import {
   deleteDoc, 
   updateDoc, 
   onSnapshot, 
-  getDocs, 
   writeBatch 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -33,12 +33,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// --- DYNAMIC SECURITY ALLOWLIST (Emails autorizados) ---
+const CORREOS_AUTORIZADOS = [
+  "leoneldariogarcia@gmail.com" // Administrador principal
+];
+
 // --- DOM REFERENCES ---
 const loginView = document.getElementById("login-view");
 const adminView = document.getElementById("admin-view");
-const loginForm = document.getElementById("login-form");
-const loginEmail = document.getElementById("login-email");
-const loginPassword = document.getElementById("login-password");
+const googleLoginBtn = document.getElementById("google-login-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userEmailTag = document.getElementById("user-email-tag");
 
@@ -61,9 +64,8 @@ const prodStock = document.getElementById("prod-stock");
 const prodImageFile = document.getElementById("prod-image-file");
 const prodImageUrl = document.getElementById("prod-image-url");
 
-const fileDropZone = document.getElementById("file-drop-zone");
-const uploadStatus = document.getElementById("upload-status");
 const imagePreview = document.getElementById("image-preview");
+const uploadStatus = document.getElementById("upload-status");
 
 // Settings & Listing
 const imgbbKeyInput = document.getElementById("imgbb-key");
@@ -80,13 +82,22 @@ if (imgbbApiKey) {
 // --- AUTHENTICATION STATE OBSERVER ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Admin is logged in
-    loginView.style.display = "none";
-    adminView.style.display = "block";
-    userEmailTag.textContent = user.email;
+    const userEmail = user.email ? user.email.toLowerCase().trim() : "";
     
-    // Subscribe to Firestore catalog updates
-    subscribeToCatalog();
+    // 🛡️ Verify if the user is in the Authorized Allowlist
+    if (CORREOS_AUTORIZADOS.map(email => email.toLowerCase().trim()).includes(userEmail)) {
+      // Access Granted!
+      loginView.style.display = "none";
+      adminView.style.display = "block";
+      userEmailTag.textContent = user.email;
+      
+      // Subscribe to Firestore catalog updates
+      subscribeToCatalog();
+    } else {
+      // Access Denied!
+      signOut(auth);
+      showToast("Acceso denegado: esta cuenta de Google no está autorizada.", "error");
+    }
   } else {
     // Admin is logged out
     loginView.style.display = "flex";
@@ -94,22 +105,22 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- AUTH ACTIONS ---
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
+// --- AUTH ACTIONS (Google Sign-In Popup) ---
+googleLoginBtn.addEventListener("click", async () => {
+  const provider = new GoogleAuthProvider();
+  // Request profile and email scopes
+  provider.addScope("profile");
+  provider.addScope("email");
 
   try {
-    showToast("Iniciando sesión...", "info");
-    await signInWithEmailAndPassword(auth, email, password);
-    showToast("¡Sesión iniciada con éxito!", "success");
-    loginForm.reset();
+    showToast("Abriendo inicio de sesión de Google...", "info");
+    await signInWithPopup(auth, provider);
+    showToast("¡Autenticación completada con éxito!", "success");
   } catch (err) {
-    console.error("Error al iniciar sesión:", err);
-    let errorMsg = "Credenciales incorrectas. Por favor, verifica el correo y contraseña.";
-    if (err.code === "auth/invalid-credential") {
-      errorMsg = "Contraseña o usuario inválidos.";
+    console.error("Error al iniciar sesión con Google:", err);
+    let errorMsg = "Error al conectar con Google. Intentá de nuevo.";
+    if (err.code === "auth/popup-closed-by-user") {
+      errorMsg = "Inicio de sesión cancelado por el usuario.";
     }
     showToast(errorMsg, "error");
   }
@@ -411,7 +422,7 @@ function renderSeedMigrationOffer() {
     <div style="padding: var(--spacing-lg); text-align: center; background-color: var(--bg-surface); border-radius: var(--radius-md); border: 2px dashed var(--accent-yellow);">
       <h4 style="color: var(--primary-navy); margin-block-end: 8px;">¡Base de datos vacía detectada!</h4>
       <p style="font-size: 0.8rem; color: var(--text-secondary); margin-block-end: 16px;">
-        Para ayudarte a empezar rápidamente, podemos migrar de forma automática los 15 repuestos muestra iniciales (de products.js) directamente a tu base de datos Firestore en vivo.
+        Para ayudarte a empezar rápidamente, podemos migrar de forma automática los 15 repuestos muestra iniciales directamente a tu base de datos Firestore en vivo.
       </p>
       <button id="run-migration-btn" class="admin-btn admin-btn-accent" style="margin: 0 auto;">
         <span>Migrar 15 Productos de Muestra</span>
@@ -427,11 +438,6 @@ function renderSeedMigrationOffer() {
 
       showToast("Migrando productos muestra...", "info");
 
-      // We load products from the global array declared in products.js
-      // which is loaded in the page via index.html scripts (or we fetch it, but since it is already linked in app.js context or loaded in memory if we import it, let's see. Wait, products is defined in products.js, but since admin.html doesn't import products.js yet, let's look:
-      // In admin.html, did we include products.js?
-      // No, admin.html only has admin.js as a script!
-      // To make it 100% self-contained and bulletproof, we will declare the 15 seed products array directly inside this javascript block! This ensures it works absolutely independently of whether products.js is loaded or deleted!
       const seedProducts = [
         {
           name: "Juego de Tazas Rodado 14 Deportivo",
@@ -645,7 +651,6 @@ function showToast(message, type = "success") {
   const toast = document.createElement("div");
   toast.className = "toast-notification";
   
-  // Dynamic border color depending on type
   if (type === "error") {
     toast.style.borderLeftColor = "#DC2626";
     toast.style.backgroundColor = "#FEE2E2";
@@ -654,7 +659,6 @@ function showToast(message, type = "success") {
     toast.style.borderLeftColor = "var(--primary-navy)";
   }
 
-  // Choose appropriate SVG icon
   const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#25D366" style="inline-size: 18px; block-size: 18px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`;
   const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#DC2626" style="inline-size: 18px; block-size: 18px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>`;
   const infoIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="var(--primary-navy)" style="inline-size: 18px; block-size: 18px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>`;

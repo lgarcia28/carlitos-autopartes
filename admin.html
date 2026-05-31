@@ -361,41 +361,31 @@
 <body class="admin-body">
 
   <!-- ================= STATE 1: LOGIN PANEL ================= -->
-  <div id="login-view" class="login-container">
+  <div id="login-view" class="login-container" style="max-inline-size: 400px; text-align: center; margin-block-start: 120px;">
     <div class="login-header">
       <div class="brand-logo-circle" style="margin: 0 auto var(--spacing-sm) auto;">A</div>
       <h2>Accesorios Autocentro</h2>
-      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-block-start: 4px;">Panel de Control Administrativo</p>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-block-start: 4px;">Panel de Control Administrativo</p>
     </div>
     
-    <form id="login-form" class="admin-form">
-      <div class="form-group">
-        <label for="login-email" class="form-label">Correo Electrónico</label>
-        <input 
-          type="email" 
-          id="login-email" 
-          class="form-control" 
-          placeholder="ejemplo@correo.com" 
-          required 
-          autocomplete="username"
-        >
-      </div>
-      <div class="form-group">
-        <label for="login-password" class="form-label">Contraseña</label>
-        <input 
-          type="password" 
-          id="login-password" 
-          class="form-control" 
-          placeholder="••••••••" 
-          required 
-          autocomplete="current-password"
-        >
-      </div>
-      <button type="submit" class="admin-btn admin-btn-accent" style="margin-block-start: var(--spacing-sm);">
-        <span>Iniciar Sesión</span>
+    <div style="margin: var(--spacing-md) 0; display: flex; flex-direction: column; gap: var(--spacing-sm);">
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">
+        Iniciá sesión de forma segura utilizando tu cuenta de Google autorizada.
+      </p>
+      
+      <button id="google-login-btn" class="admin-btn" style="background-color: white; color: var(--text-primary); border: 1.5px solid var(--border-light); font-weight: 600; box-shadow: var(--shadow-sm); display: flex; justify-content: center; align-items: center; gap: 12px; padding: 12px; cursor: pointer;">
+        <!-- Official Google 'G' Logo SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="inline-size: 20px; block-size: 20px;">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24c0-1.63-.15-3.2-.43-4.73H24v9h12.75c-.55 2.91-2.2 5.38-4.67 7.04l7.25 5.62c4.24-3.9 6.67-9.66 6.67-16.93z"/>
+          <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.98-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.25-5.62c-2.01 1.35-4.58 2.18-8.64 2.18-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Acceder con Google</span>
       </button>
-    </form>
-    <div style="text-align: center; font-size: 0.8rem;">
+    </div>
+
+    <div style="text-align: center; font-size: 0.8rem; border-block-start: 1px solid var(--border-light); padding-block-start: var(--spacing-sm); margin-block-start: var(--spacing-xs);">
       <a href="index.html" style="color: var(--primary-navy); font-weight: 600; text-decoration: underline;">Volver a la Tienda</a>
     </div>
   </div>
