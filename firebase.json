@@ -7,7 +7,14 @@
       "**/node_modules/**",
       "task.md",
       "walkthrough.md",
-      "implementation_plan.md"
+      "implementation_plan.md",
+      "seed-products.cjs",
+      "seed-rest.cjs",
+      "package.json",
+      "package-lock.json"
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }
