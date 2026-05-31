@@ -1,0 +1,24 @@
+{
+  "name": "carlitos-autopartes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lgarcia28/carlitos-autopartes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lgarcia28/carlitos-autopartes/issues"
+  },
+  "homepage": "https://github.com/lgarcia28/carlitos-autopartes#readme",
+  "dependencies": {
+    "firebase-admin": "^13.10.0"
+  }
+}
