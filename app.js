@@ -465,8 +465,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     filtered.forEach((p, index) => {
-      const isLowStock = p.stock <= 5;
-      
       const card = document.createElement("article");
       card.className = "product-card";
       card.style.animationDelay = `${index * 0.04}s`;
@@ -482,9 +480,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="product-footer">
           <div class="price-stock-wrapper">
             <span class="product-price">${formatARS(p.price)}</span>
-            <span class="product-stock ${isLowStock ? "low-stock" : ""}">
-              ${isLowStock ? `¡Solo ${p.stock} disp.!` : `${p.stock} disponibles`}
-            </span>
           </div>
           <button class="add-to-cart-btn" data-product-id="${p.id}">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
