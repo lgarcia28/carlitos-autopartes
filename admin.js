@@ -1,9 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getAuth, 
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -44,7 +42,9 @@ const CORREOS_AUTORIZADOS = [
 // --- DOM REFERENCES ---
 const loginView = document.getElementById("login-view");
 const adminView = document.getElementById("admin-view");
-const googleLoginBtn = document.getElementById("google-login-btn");
+const loginForm = document.getElementById("login-form");
+const loginEmail = document.getElementById("login-email");
+const loginPassword = document.getElementById("login-password");
 const logoutBtn = document.getElementById("logout-btn");
 const userEmailTag = document.getElementById("user-email-tag");
 
@@ -82,25 +82,6 @@ if (imgbbApiKey) {
   imgbbKeyInput.value = imgbbApiKey;
 }
 
-// --- CAPTURE REDIRECT RESULT (Para capturar errores o éxito post-redirección) ---
-getRedirectResult(auth)
-  .then((result) => {
-    if (result && result.user) {
-      console.log("Sesión iniciada vía redirección:", result.user.email);
-      showToast("¡Autenticación completada con éxito!", "success");
-    }
-  })
-  .catch((err) => {
-    console.error("Error al retornar de la redirección de Google:", err);
-    let errorMsg = "Error al iniciar sesión con Google. Intentá de nuevo.";
-    if (err.code === "auth/unauthorized-domain") {
-      errorMsg = "Este dominio no está autorizado en la consola de Firebase.";
-    } else if (err.code === "auth/operation-not-allowed") {
-      errorMsg = "El proveedor de Google no está habilitado en Firebase.";
-    }
-    showToast(errorMsg, "error");
-  });
-
 // --- AUTHENTICATION STATE OBSERVER ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -118,7 +99,7 @@ onAuthStateChanged(auth, (user) => {
     } else {
       // Access Denied!
       signOut(auth);
-      showToast("Acceso denegado: esta cuenta de Google no está autorizada.", "error");
+      showToast("Acceso denegado: este correo electrónico no está autorizado.", "error");
     }
   } else {
     // Admin is logged out
@@ -127,20 +108,30 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- AUTH ACTIONS (Google Sign-In Redirect) ---
-googleLoginBtn.addEventListener("click", async () => {
-  const provider = new GoogleAuthProvider();
-  // Request profile and email scopes
-  provider.addScope("profile");
-  provider.addScope("email");
+// --- AUTH ACTIONS (Email & Password Sign-In) ---
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const emailVal = loginEmail.value.trim();
+  const passwordVal = loginPassword.value;
 
   try {
-    showToast("Redirigiendo a inicio de sesión de Google...", "info");
-    // Usamos redirección para evitar bloqueadores de popups, especialmente en celulares
-    await signInWithRedirect(auth, provider);
+    showToast("Iniciando sesión...", "info");
+    await signInWithEmailAndPassword(auth, emailVal, passwordVal);
+    showToast("¡Ingreso exitoso!", "success");
   } catch (err) {
-    console.error("Error al iniciar redirección de Google:", err);
-    showToast("Error al iniciar sesión con Google. Intentá de nuevo.", "error");
+    console.error("Error al iniciar sesión:", err);
+    let errorMsg = "Usuario o contraseña incorrectos.";
+    if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+      errorMsg = "Correo o contraseña inválidos.";
+    } else if (err.code === "auth/invalid-credential") {
+      errorMsg = "Credenciales incorrectas. Verificá los datos.";
+    } else if (err.code === "auth/operation-not-allowed") {
+      errorMsg = "El inicio de sesión por correo y contraseña no está habilitado en tu consola Firebase.";
+    } else if (err.code === "auth/too-many-requests") {
+      errorMsg = "Acceso bloqueado temporalmente por demasiados intentos fallidos.";
+    }
+    showToast(errorMsg, "error");
   }
 });
 
