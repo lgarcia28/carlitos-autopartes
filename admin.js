@@ -36,14 +36,15 @@ const db = getFirestore(app);
 
 // --- DYNAMIC SECURITY ALLOWLIST (Emails autorizados) ---
 const CORREOS_AUTORIZADOS = [
-  "leoneldariogarcia@gmail.com" // Administrador principal
+  "leoneldariogarcia@gmail.com", // Administrador principal
+  "carlitos@carlitosautopartes.com" // Usuario simplificado "carlitos"
 ];
 
 // --- DOM REFERENCES ---
 const loginView = document.getElementById("login-view");
 const adminView = document.getElementById("admin-view");
 const loginForm = document.getElementById("login-form");
-const loginEmail = document.getElementById("login-email");
+const loginUsername = document.getElementById("login-username");
 const loginPassword = document.getElementById("login-password");
 const logoutBtn = document.getElementById("logout-btn");
 const userEmailTag = document.getElementById("user-email-tag");
@@ -112,8 +113,14 @@ onAuthStateChanged(auth, (user) => {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const emailVal = loginEmail.value.trim();
+  const usernameVal = loginUsername.value.trim();
   const passwordVal = loginPassword.value;
+
+  // Si el usuario ingresa un nombre simple (ej. "carlitos"), lo convertimos internamente en un correo válido para Firebase
+  let emailVal = usernameVal;
+  if (!emailVal.includes("@")) {
+    emailVal = `${usernameVal.toLowerCase()}@carlitosautopartes.com`;
+  }
 
   try {
     showToast("Iniciando sesión...", "info");
@@ -123,7 +130,7 @@ loginForm.addEventListener("submit", async (e) => {
     console.error("Error al iniciar sesión:", err);
     let errorMsg = "Usuario o contraseña incorrectos.";
     if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-      errorMsg = "Correo o contraseña inválidos.";
+      errorMsg = "Usuario o contraseña incorrectos.";
     } else if (err.code === "auth/invalid-credential") {
       errorMsg = "Credenciales incorrectas. Verificá los datos.";
     } else if (err.code === "auth/operation-not-allowed") {
