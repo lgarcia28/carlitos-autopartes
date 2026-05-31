@@ -6,25 +6,23 @@
   --primary-navy: #0B2545;
   --primary-navy-rgb: 11, 37, 69;
   --secondary-navy: #134074;
-  --accent-yellow: #fff159; /* Mercado Libre yellow */
-  --accent-yellow-dark: #e6d817;
-  --accent-yellow-rgb: 255, 241, 89;
-  --brand-blue: #3483fa; /* Mercado Libre blue */
-  --brand-blue-hover: #2968c8;
-  --brand-green: #00a650; /* Mercado Libre green */
-  --brand-green-light: rgba(0, 166, 80, 0.1);
+  --accent-yellow: #FFC107;
+  --accent-yellow-dark: #E0A800;
+  --accent-yellow-rgb: 255, 193, 7;
+  --brand-blue: #3483fa; /* Keep e-commerce blue helper if needed */
+  --brand-green: #00a650; /* Keep e-commerce green helper if needed */
   
   /* Neutral Palette */
-  --bg-main: #f5f5f5; /* Light grey backdrop */
+  --bg-main: #F8F9FA;
   --bg-surface: #FFFFFF;
-  --bg-surface-low: #f8f9fa;
-  --text-primary: #333333; /* Dark gray for high legibility */
-  --text-secondary: #666666;
+  --bg-surface-low: #F1F3F5;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
   --text-on-navy: #FFFFFF;
-  --text-on-yellow: #333333;
+  --text-on-yellow: #0B2545;
   
   /* Borders & Shadows */
-  --border-light: #e6e6e6; /* Soft border color */
+  --border-light: #E2E8F0;
   --border-focus: var(--primary-navy);
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -108,17 +106,30 @@ a {
 
 /* --- VISUAL GRAPHICS (Facade aesthetics) --- */
 .accent-line-top {
-  display: none; /* Hidden for pure e-commerce look */
+  block-size: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--accent-yellow),
+    var(--accent-yellow) 10px,
+    var(--primary-navy) 10px,
+    var(--primary-navy) 20px
+  );
+  inline-size: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1001;
 }
 
 /* --- HEADER & NAVIGATION --- */
 header.app-header {
   position: sticky;
-  top: 0; /* Sticky to top */
+  top: 6px; /* Below the accent line */
   z-index: 1000;
-  background-color: var(--accent-yellow); /* Yellow background */
-  border-block-end: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
   inline-size: 100%;
 }
 
@@ -140,19 +151,19 @@ header.app-header {
 }
 
 .brand-logo-circle {
-  inline-size: 44px;
-  block-size: 44px;
-  background-color: var(--primary-navy);
+  inline-size: 48px;
+  block-size: 48px;
+  background-color: var(--accent-yellow);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Outfit', sans-serif;
   font-weight: 800;
-  font-size: 1.15rem;
-  color: var(--accent-yellow); /* Contrast yellow text */
-  border: 2.5px solid var(--primary-navy);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 1.25rem;
+  color: var(--primary-navy);
+  border: 3px solid var(--primary-navy);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease;
 }
 
@@ -161,7 +172,7 @@ header.app-header {
 }
 
 .brand-details h1 {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   color: var(--primary-navy);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -169,8 +180,7 @@ header.app-header {
 
 .brand-details .store-address {
   font-size: 0.75rem;
-  color: var(--primary-navy);
-  opacity: 0.8;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -179,13 +189,13 @@ header.app-header {
 .brand-details .store-address svg {
   inline-size: 12px;
   block-size: 12px;
-  stroke: var(--primary-navy);
+  stroke: var(--text-secondary);
 }
 
 /* Global search within header */
 .header-search-wrapper {
   flex: 1;
-  max-inline-size: 520px;
+  max-inline-size: 480px;
 }
 
 .search-form {
@@ -196,20 +206,19 @@ header.app-header {
 
 .search-input {
   inline-size: 100%;
-  padding: 12px 16px 12px 42px;
-  border-radius: 6px; /* Square modern shape */
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background-color: #FFFFFF; /* White background */
+  padding: 10px 16px 10px 42px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-light);
+  background-color: var(--bg-main);
   outline: none;
-  font-size: 0.95rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: all 0.25s ease;
+  font-size: 0.9rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .search-input:focus {
-  background-color: #FFFFFF;
-  border-color: var(--brand-blue); /* Blue border on focus */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  background-color: var(--bg-surface);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 4px rgba(11, 37, 69, 0.08);
 }
 
 .search-icon-btn {
@@ -226,14 +235,12 @@ header.app-header {
 .search-icon-btn svg {
   inline-size: 18px;
   block-size: 18px;
-  stroke: var(--primary-navy);
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
+  stroke: var(--text-secondary);
+  transition: stroke 0.3s ease;
 }
 
 .search-input:focus ~ .search-icon-btn svg {
-  opacity: 1;
-  stroke: var(--brand-blue);
+  stroke: var(--primary-navy);
 }
 
 /* Shopping Cart Header Icon */
@@ -244,27 +251,29 @@ header.app-header {
 }
 
 .cart-toggle-btn {
-  background: none; /* Transparent modern button */
+  background: var(--primary-navy);
   border: none;
-  color: var(--primary-navy);
-  padding: 10px;
+  color: var(--text-on-navy);
+  padding: 12px;
   border-radius: var(--radius-full);
   cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cart-toggle-btn:hover {
-  background-color: rgba(11, 37, 69, 0.08);
-  transform: scale(1.05);
+  background: var(--secondary-navy);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .cart-toggle-btn svg {
-  inline-size: 22px;
-  block-size: 22px;
+  inline-size: 20px;
+  block-size: 20px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2px;
@@ -272,53 +281,26 @@ header.app-header {
 
 .cart-badge {
   position: absolute;
-  top: 0px;
-  right: 0px;
-  background-color: #D9383A; /* Red e-commerce badge */
-  color: #FFFFFF;
+  top: -4px;
+  right: -4px;
+  background-color: var(--accent-yellow);
+  color: var(--text-on-yellow);
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
-  font-size: 0.7rem;
-  inline-size: 18px;
-  block-size: 18px;
+  font-size: 0.75rem;
+  inline-size: 20px;
+  block-size: 20px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--accent-yellow); /* Yellow header border */
+  border: 2px solid var(--primary-navy);
   animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes badgePop {
   0% { transform: scale(0); }
   100% { transform: scale(1); }
-}
-
-/* --- STORE DELIVERY STRIPE --- */
-.store-delivery-stripe {
-  background-color: var(--accent-yellow); /* Matching header yellow */
-  border-block-start: 1px solid rgba(0, 0, 0, 0.03);
-  border-block-end: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 8px var(--spacing-lg);
-  font-size: 0.8rem;
-  color: var(--primary-navy);
-  width: 100%;
-}
-
-.stripe-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.9;
-}
-
-.stripe-icon {
-  width: 14px;
-  height: 14px;
-  stroke: var(--primary-navy);
-  flex-shrink: 0;
 }
 
 /* --- NEW INTRODUCTORY HERO COVER (Shaded storefront image) --- */
@@ -807,7 +789,7 @@ aside.filter-sidebar {
 
 .product-card:hover {
   transform: translateY(-4px);
-  border-color: var(--brand-blue); /* Highlights in blue on hover */
+  border-color: var(--accent-yellow); /* Highlights in brand golden yellow */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -922,8 +904,8 @@ aside.filter-sidebar {
 /* Action button */
 .add-to-cart-btn {
   inline-size: 100%;
-  background-color: rgba(52, 131, 250, 0.08); /* Transparent blue signature ML */
-  color: var(--brand-blue);
+  background-color: var(--primary-navy);
+  color: var(--text-on-navy);
   border: none;
   padding: 10px;
   border-radius: 6px;
@@ -937,8 +919,8 @@ aside.filter-sidebar {
 }
 
 .add-to-cart-btn:hover {
-  background-color: var(--brand-blue); /* Solid blue on hover */
-  color: #FFFFFF;
+  background-color: var(--secondary-navy);
+  color: var(--text-on-navy);
 }
 
 .add-to-cart-btn svg {
@@ -1737,8 +1719,8 @@ footer.app-footer {
   }
 
   .price-stock-wrapper::after {
-    content: "Retiro GRATIS"; /* Professional e-commerce touch */
-    color: var(--brand-green);
+    content: "Retiro GRATIS"; /* Coherent e-commerce touch */
+    color: #25D366; /* Matching WhatsApp green already in use */
     font-size: 0.68rem;
     font-weight: 700;
     margin-top: 1px;
