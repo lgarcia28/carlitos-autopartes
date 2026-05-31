@@ -1706,8 +1706,8 @@ footer.app-footer {
   aside.filter-sidebar.mobile-open {
     display: block !important;
     position: static !important;
-    margin: 0 0 var(--spacing-md) 0 !important;
-    padding: 12px 16px !important;
+    margin: 0 0 10px 0 !important;
+    padding: 8px 12px !important;
     background-color: var(--bg-surface) !important;
     border-radius: var(--radius-md) !important;
     border: 1px solid var(--border-light) !important;
@@ -1718,6 +1718,58 @@ footer.app-footer {
 
   aside.filter-sidebar .filter-section-title {
     display: none !important; /* Save vital vertical space */
+  }
+
+  /* Premium horizontal scroll category pills on mobile */
+  aside.filter-sidebar.mobile-open .category-list {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: var(--spacing-sm) !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-list::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: var(--radius-full) !important;
+    color: #333333 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-btn.active {
+    background-color: var(--primary-navy) !important;
+    border-color: var(--primary-navy) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-count {
+    font-size: 0.7rem !important;
+    background-color: var(--bg-surface-low) !important;
+    color: var(--text-secondary) !important;
+    padding: 1px 6px !important;
+    border-radius: var(--radius-full) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  aside.filter-sidebar.mobile-open .category-btn.active .category-count {
+    background-color: var(--accent-yellow) !important;
+    color: var(--text-on-yellow) !important;
   }
 
   .store-filters-bar.mobile-open {

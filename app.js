@@ -72,6 +72,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Bind interactive actions
     bindEventListeners();
     setupInvokersFallback();
+
+    // 4. Adapt layout for mobile responsive order
+    setupResponsiveLayout();
+  }
+
+  function setupResponsiveLayout() {
+    const filterToggle = document.getElementById("mobile-filter-toggle");
+    const sidebar = document.querySelector("aside.filter-sidebar");
+    
+    if (filterToggle && sidebar && window.innerWidth <= 768) {
+      // Move sidebar to be a sibling right after the toggle button
+      filterToggle.parentNode.insertBefore(sidebar, filterToggle.nextSibling);
+    }
   }
 
   // --- SUBSCRIBE TO LIVE FIRESTORE COLLECTION ---
