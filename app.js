@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const brandFilter = document.getElementById("brand-filter");
   const modelFilter = document.getElementById("model-filter");
   const yearFilter = document.getElementById("year-filter");
+  const resetFiltersBtn = document.getElementById("reset-filters-btn");
   
   // Shopping Cart & Drawer
   const cartDrawer = document.getElementById("cart-drawer");
@@ -127,6 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
       saveCart();
       renderCart();
     });
+
+    // G. Reset Filters Action
+    resetFiltersBtn.addEventListener("click", () => {
+      resetVehicleFilters();
+    });
   }
 
   // --- HIERARCHICAL DYNAMIC FILTERS LOGIC ---
@@ -226,7 +232,23 @@ document.addEventListener("DOMContentLoaded", () => {
         yearFilter.disabled = false;
       }
     }
+ 
+    renderProducts();
+  }
 
+  // 4. Reset all filters to default state
+  function resetVehicleFilters() {
+    selectedBrand = "Todas";
+    selectedModel = "Todos";
+    selectedYear = "Todos";
+
+    brandFilter.value = "Todas";
+    modelFilter.innerHTML = '<option value="Todos">Todos los modelos</option>';
+    modelFilter.disabled = true;
+    yearFilter.innerHTML = '<option value="Todos">Todos los años</option>';
+    yearFilter.disabled = true;
+
+    resetFiltersBtn.style.display = "none";
     renderProducts();
   }
 
@@ -294,6 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderProducts() {
     productGrid.innerHTML = "";
 
+    // Toggle reset filters button visibility
+    const hasActiveFilters = selectedBrand !== "Todas" || selectedModel !== "Todos" || selectedYear !== "Todos";
+    if (resetFiltersBtn) {
+      resetFiltersBtn.style.display = hasActiveFilters ? "inline-flex" : "none";
+    }
+
     // Apply combined filters: Category + Keyword Search + Brand + Model + Year compatibility
     const filtered = products.filter(p => {
       // 1. Category Filter Match
@@ -334,11 +362,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    filtered.forEach(p => {
+    filtered.forEach((p, index) => {
       const isLowStock = p.stock <= 5;
       
       const card = document.createElement("article");
       card.className = "product-card";
+      card.style.animationDelay = `${index * 0.04}s`;
       card.innerHTML = `
         <div class="product-img-wrapper">
           <span class="category-tag">${p.category}</span>
@@ -394,8 +423,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCart();
     animateCartBadge();
     
-    // Auto-open drawer when adding for clear micro-interaction
-    cartDrawer.showModal();
+    // Show a beautiful premium toast instead of disrupting navigation
+    showToast(`¡Añadido al pedido: ${product.name}!`);
   }
 
   // --- MANIPULATE QUANTITIES AND REMOVALS ---
@@ -436,10 +465,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- CART ANIMATION INTERACTION ---
   function animateCartBadge() {
-    cartToggleBtn.style.transform = "scale(1.15)";
+    cartToggleBtn.classList.remove("bounce");
+    void cartToggleBtn.offsetWidth; // trigger reflow
+    cartToggleBtn.classList.add("bounce");
+  }
+
+  // --- TOAST NOTIFICATIONS SYSTEM ---
+  function showToast(message) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+
+    // Clear existing notifications to avoid visual clutter
+    const activeToasts = container.querySelectorAll(".toast-notification");
+    activeToasts.forEach(t => {
+      t.classList.add("hide");
+      setTimeout(() => t.remove(), 300);
+    });
+
+    const toast = document.createElement("div");
+    toast.className = "toast-notification";
+    toast.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#25D366" style="inline-size: 18px; block-size: 18px; flex-shrink: 0;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      <span>${message}</span>
+      <button class="toast-action-btn" id="toast-action">Ver pedido</button>
+    `;
+
+    toast.querySelector("#toast-action").addEventListener("click", () => {
+      cartDrawer.showModal();
+      toast.classList.add("hide");
+      setTimeout(() => toast.remove(), 300);
+    });
+
+    container.appendChild(toast);
+
     setTimeout(() => {
-      cartToggleBtn.style.transform = "";
-    }, 150);
+      if (toast.parentNode) {
+        toast.classList.add("hide");
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 3500);
   }
 
   // --- RENDER CART DRAWER CONTENTS ---

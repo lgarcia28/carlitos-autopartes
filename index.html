@@ -227,6 +227,17 @@
               <option value="Todos">Todos los años</option>
             </select>
           </div>
+          <button 
+            id="reset-filters-btn" 
+            class="reset-filters-btn" 
+            aria-label="Limpiar todos los filtros de vehículo"
+            style="display: none;"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+            <span>Limpiar Filtros</span>
+          </button>
         </div>
         <div class="results-meta">
           <span class="results-count" id="results-count">Mostrando 15 productos</span>
@@ -430,5 +441,8 @@
   <!-- Scripts Connection -->
   <script src="products.js"></script>
   <script src="app.js" defer></script>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
 </body>
 </html>

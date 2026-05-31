@@ -712,6 +712,36 @@ aside.filter-sidebar {
   border-color: var(--border-light);
 }
 
+.reset-filters-btn {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.reset-filters-btn:hover {
+  background-color: #FEE2E2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+  transform: translateY(-1px);
+}
+
+.reset-filters-btn svg {
+  inline-size: 14px;
+  block-size: 14px;
+  stroke: currentColor;
+}
+
+
 .results-meta {
   font-size: 0.9rem;
   font-weight: 500;
@@ -1545,6 +1575,100 @@ footer.app-footer {
     padding-inline-end: 0;
     padding-block-end: var(--spacing-xs);
     inline-size: 100%;
+  }
+}
+
+/* TOAST NOTIFICATION SYSTEM & CART VIBRATION */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  pointer-events: none;
+}
+
+.toast-notification {
+  background-color: var(--primary-navy);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-dialog);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  pointer-events: auto;
+  transform: translateY(40px);
+  opacity: 0;
+  animation: toast-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-left: 4px solid var(--accent-yellow);
+}
+
+.toast-notification.hide {
+  animation: toast-slide-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  color: var(--accent-yellow);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+.toast-action-btn:hover {
+  background: var(--accent-yellow);
+  color: var(--primary-navy);
+}
+
+.cart-toggle-btn.bounce {
+  animation: cart-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+/* Staggered entrance for premium product cards */
+.product-card {
+  animation: reveal-card 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes toast-slide-in {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes cart-bounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.25) rotate(-8deg); }
+  60% { transform: scale(0.9) rotate(3deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes reveal-card {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
