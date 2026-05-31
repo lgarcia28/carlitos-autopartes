@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Accesorios Autocentro</title>
+  
+  <!-- Google Fonts Connection -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Admin specific overrides */
+    .admin-body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+    }
+    
+    .login-container {
+      max-inline-size: 420px;
+      margin: 100px auto;
+      padding: var(--spacing-lg);
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-block-end: var(--spacing-sm);
+    }
+    
+    .login-header h2 {
+      color: var(--primary-navy);
+      font-size: 1.5rem;
+    }
+    
+    .admin-layout {
+      max-inline-size: var(--max-width);
+      margin: 40px auto;
+      padding: 0 var(--spacing-lg);
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--spacing-lg);
+    }
+    
+    @media (max-width: 900px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .admin-card {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+    
+    .admin-card-title {
+      font-size: 1.2rem;
+      color: var(--primary-navy);
+      border-block-end: 1px solid var(--border-light);
+      padding-block-end: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .admin-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-sm);
+    }
+    
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    
+    .form-control {
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border-light);
+      background-color: var(--bg-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-navy);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+      border-color: var(--border-focus);
+      background-color: var(--bg-surface);
+    }
+    
+    /* Upload Button Styles */
+    .file-upload-wrapper {
+      position: relative;
+      border: 2px dashed var(--border-light);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      text-align: center;
+      background-color: var(--bg-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .file-upload-wrapper:hover {
+      background-color: var(--bg-surface-low);
+      border-color: var(--primary-navy);
+    }
+    
+    .file-upload-wrapper input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .upload-icon {
+      inline-size: 32px;
+      block-size: 32px;
+      margin: 0 auto var(--spacing-xs);
+      color: var(--text-secondary);
+    }
+    
+    .upload-preview {
+      max-block-size: 120px;
+      margin: var(--spacing-xs) auto 0;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+    
+    /* Action Buttons */
+    .admin-btn {
+      padding: 12px var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      transition: all 0.2s ease;
+      border: none;
+    }
+    
+    .admin-btn-primary {
+      background-color: var(--primary-navy);
+      color: white;
+    }
+    
+    .admin-btn-primary:hover {
+      background-color: var(--secondary-navy);
+      transform: translateY(-1px);
+    }
+    
+    .admin-btn-accent {
+      background-color: var(--accent-yellow);
+      color: var(--primary-navy);
+    }
+    
+    .admin-btn-accent:hover {
+      background-color: var(--accent-yellow-dark);
+      transform: translateY(-1px);
+    }
+    
+    .admin-btn-danger {
+      background-color: transparent;
+      color: #DC2626;
+      border: 1px solid var(--border-light);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+    
+    .admin-btn-danger:hover {
+      background-color: #FEE2E2;
+      border-color: #FCA5A5;
+    }
+    
+    /* Settings panel */
+    .settings-panel {
+      background-color: var(--bg-surface-low);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      margin-block-end: var(--spacing-md);
+    }
+    
+    /* Products Table Management */
+    .products-list-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      max-block-size: 780px;
+      overflow-y: auto;
+      padding-inline-end: 8px;
+    }
+    
+    .manage-item-card {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      transition: all 0.2s ease;
+    }
+    
+    .manage-item-card:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: var(--border-focus);
+    }
+    
+    .manage-item-img {
+      inline-size: 60px;
+      block-size: 60px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-main);
+    }
+    
+    .manage-item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .manage-item-title {
+      font-weight: 600;
+      color: var(--primary-navy);
+      font-size: 0.95rem;
+    }
+    
+    .manage-item-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .manage-item-inputs {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .inline-input-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .inline-input-group span {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    
+    .inline-input {
+      inline-size: 90px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      outline: none;
+      text-align: right;
+    }
+    
+    .inline-input:focus {
+      border-color: var(--primary-navy);
+    }
+    
+    /* Navigation Bar */
+    .admin-navbar {
+      background-color: var(--primary-navy);
+      color: white;
+      padding: var(--spacing-sm) 0;
+    }
+    
+    .admin-nav-container {
+      max-inline-size: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .admin-logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--accent-yellow);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .admin-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    
+    .user-tag {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .btn-logout {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-logout:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: white;
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- DIAGNÓSTICO EN PANTALLA: Captura y muestra cualquier error de JavaScript -->
+  <div id="diagnostico-error-box" style="display: none; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #FEE2E2; border: 2px solid #DC2626; color: #DC2626; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left; box-shadow: var(--shadow-lg);">
+    <h3 style="margin-top: 0; color: #991B1B; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+      ⚠️ Error de Sistema (Diagnóstico)
+    </h3>
+    <p style="margin-bottom: 10px; color: #7F1D1D;">Se detectó una falla al inicializar la página o durante la autenticación. Compartinos el texto de abajo:</p>
+    <pre id="diagnostico-error-content" style="white-space: pre-wrap; background: white; padding: 10px; border-radius: 4px; border: 1px solid #FCA5A5; max-height: 250px; overflow-y: auto; color: #374151; font-weight: bold;"></pre>
+    <button onclick="document.getElementById('diagnostico-error-box').style.display='none'" style="margin-top: 12px; padding: 6px 12px; background-color: #DC2626; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Cerrar Diagnóstico</button>
+  </div>
+  <script>
+    // Captura errores globales de sintaxis o de importación de scripts/módulos
+    window.addEventListener('error', function(e) {
+      document.getElementById('diagnostico-error-box').style.display = 'block';
+      const msg = e.message || 'Error de carga/importación de recurso (ej. Firebase CDN)';
+      const source = e.filename ? ('\nArchivo: ' + e.filename + '\nLínea: ' + e.lineno) : '';
+      document.getElementById('diagnostico-error-content').textContent += '\n[ERROR] ' + msg + source;
+    }, true); // Use capture phase to catch resource loading errors too
+
+    // Captura promesas rechazadas (como fallas del SDK de Firebase Auth)
+    window.addEventListener('unhandledrejection', function(e) {
+      document.getElementById('diagnostico-error-box').style.display = 'block';
+      const reason = e.reason;
+      let msg = 'Rechazo de promesa desconocido';
+      if (reason) {
+        msg = reason.message || reason.code || JSON.stringify(reason);
+        if (reason.stack) {
+          msg += '\nStack:\n' + reason.stack;
+        }
+      }
+      document.getElementById('diagnostico-error-content').textContent += '\n[PROMESA RECHAZADA] ' + msg;
+    });
+  </script>
+
+  <!-- ================= STATE 1: LOGIN PANEL ================= -->
+  <div id="login-view" class="login-container" style="max-inline-size: 400px; text-align: center; margin-block-start: 120px;">
+    <div class="login-header">
+      <div class="brand-logo-circle" style="margin: 0 auto var(--spacing-sm) auto;">A</div>
+      <h2>Accesorios Autocentro</h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-block-start: 4px;">Panel de Control Administrativo</p>
+    </div>
+    
+    <form id="login-form" style="margin: var(--spacing-md) 0; display: flex; flex-direction: column; gap: var(--spacing-sm); text-align: left;">
+      <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-bottom: 8px;">
+        Iniciá sesión con el usuario y contraseña registrados para tu cuenta de administrador.
+      </p>
+      
+      <div class="form-group">
+        <label for="login-username" class="form-label">Usuario</label>
+        <input type="text" id="login-username" class="form-control" placeholder="Ej. carlitos" required style="font-weight: 500;" autocomplete="username">
+      </div>
+      
+      <div class="form-group">
+        <label for="login-password" class="form-label">Contraseña</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required style="font-weight: 500;">
+      </div>
+      
+      <button type="submit" class="admin-btn admin-btn-primary" style="margin-top: 8px; width: 100%; display: flex; justify-content: center; align-items: center;">
+        <span>Ingresar al Panel</span>
+      </button>
+    </form>
+
+    <div style="text-align: center; font-size: 0.8rem; border-block-start: 1px solid var(--border-light); padding-block-start: var(--spacing-sm); margin-block-start: var(--spacing-xs);">
+      <a href="index.html" style="color: var(--primary-navy); font-weight: 600; text-decoration: underline;">Volver a la Tienda</a>
+    </div>
+  </div>
+
+  <!-- ================= STATE 2: CONTROL DASHBOARD ================= -->
+  <div id="admin-view" style="display: none;">
+    <!-- Navigation Bar -->
+    <nav class="admin-navbar">
+      <div class="admin-nav-container">
+        <div class="admin-logo">
+          <span>Accesorios Autocentro - Panel Admin</span>
+        </div>
+        <div class="admin-nav-actions">
+          <span class="user-tag" id="user-email-tag">admin@autocentro.com</span>
+          <button class="btn-logout" id="logout-btn">Salir</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="admin-layout">
+      
+      <!-- LEFT COLUMN: ADD / EDIT FORM -->
+      <section class="admin-card">
+        <h3 class="admin-card-title">
+          <span id="form-action-title">Cargar Producto Nuevo</span>
+          <button id="cancel-edit-btn" class="admin-btn-danger" style="display: none; padding: 4px 8px; font-size: 0.7rem; border-radius: var(--radius-sm);">Cancelar</button>
+        </h3>
+        
+        <!-- API Settings Box (Hidden by default or toggled) -->
+        <div class="settings-panel">
+          <div class="form-group">
+            <label for="imgbb-key" class="form-label" style="font-size: 0.7rem;">ImgBB API Key (Para fotos sin tarjeta)</label>
+            <div style="display: flex; gap: var(--spacing-xs);">
+              <input 
+                type="password" 
+                id="imgbb-key" 
+                class="form-control" 
+                placeholder="Pegá tu API key de ImgBB" 
+                style="padding: 6px 10px; font-size: 0.75rem; flex: 1;"
+              >
+              <button id="save-settings-btn" class="admin-btn admin-btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">Guardar</button>
+            </div>
+            <p style="font-size: 0.65rem; color: var(--text-secondary); margin-block-start: 4px;">
+              Obtenela gratis en 10 segundos registrándote en <a href="https://api.imgbb.com/" target="_blank" style="text-decoration: underline; color: var(--primary-navy); font-weight: 600;">api.imgbb.com</a>.
+            </p>
+          </div>
+        </div>
+
+        <form id="product-form" class="admin-form">
+          <input type="hidden" id="edit-product-id">
+          
+          <div class="form-group">
+            <label for="prod-name" class="form-label">Nombre del Repuesto</label>
+            <input type="text" id="prod-name" class="form-control" placeholder="Ej. Faro Trasero Hilux 2020" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-desc" class="form-label">Descripción Detallada</label>
+            <input type="text" id="prod-desc" class="form-control" placeholder="Ej. Faro trasero con lamparilla acrílica de alta resistencia" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-category" class="form-label">Categoría</label>
+            <select id="prod-category" class="form-control" required>
+              <option value="Faros y Ópticas">Faros y Ópticas</option>
+              <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
+              <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
+              <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
+              <option value="Tazas y Molduras">Tazas y Molduras</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-brand" class="form-label">Marca Auto (o Universal)</label>
+              <input type="text" id="prod-brand" class="form-control" placeholder="Ej. Toyota" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-model" class="form-label">Modelo específico</label>
+              <input type="text" id="prod-model" class="form-control" placeholder="Ej. Hilux" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-year-start" class="form-label">Año Inicio</label>
+              <input type="number" id="prod-year-start" class="form-control" placeholder="Ej. 2016" value="2016" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-year-end" class="form-label">Año Fin</label>
+              <input type="number" id="prod-year-end" class="form-control" placeholder="Ej. 2026" value="2026" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-price" class="form-label">Precio ($ ARS)</label>
+              <input type="number" id="prod-price" class="form-control" placeholder="12500" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-stock" class="form-label">Stock Disp.</label>
+              <input type="number" id="prod-stock" class="form-control" placeholder="10" value="10" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Foto del Repuesto (Cámara o Galería)</label>
+            <div class="file-upload-wrapper" id="file-drop-zone">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="upload-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+              </svg>
+              <span id="upload-status" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Elegir foto o sacar foto con la cámara</span>
+              <!-- Native accept for camera trigger on mobile -->
+              <input type="file" id="prod-image-file" accept="image/*">
+              <img id="image-preview" class="upload-preview" alt="Vista previa de foto">
+            </div>
+            <!-- String fallback in case edit preserves old image -->
+            <input type="hidden" id="prod-image-url">
+          </div>
+
+          <button type="submit" class="admin-btn admin-btn-accent" id="save-product-btn" style="margin-block-start: var(--spacing-xs);">
+            <span>Guardar Producto</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- RIGHT COLUMN: PRODUCTS LIST -->
+      <section class="admin-card">
+        <h3 class="admin-card-title">
+          <span>Gestionar Catálogo</span>
+          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;" id="admin-results-count">Cargando catálogo...</span>
+        </h3>
+        
+        <div class="products-list-wrapper" id="admin-products-list">
+          <!-- Rendered dynamically by admin.js -->
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Firebase Connection via script modules -->
+  <script type="module" src="control.js"></script>
+</body>
+</html>
