@@ -1462,7 +1462,7 @@ footer.app-footer {
 
 /* --- RESPONSIVE MECHANICS (MOBILE-FIRST) --- */
 
-@media (max-inline-size: 992px) {
+@media (max-width: 992px) {
   .main-container {
     grid-template-columns: 1fr;
     padding: var(--spacing-md);
@@ -1489,23 +1489,28 @@ footer.app-footer {
     gap: var(--spacing-sm);
     scroll-snap-type: x mandatory;
     scrollbar-width: none; /* Hide standard Firefox scroll */
+    -webkit-overflow-scrolling: touch; /* Butter-smooth scrolling on iOS */
   }
 
   .category-list::-webkit-scrollbar {
-    display: none; /* Hide Chrome scroll */
+    display: none; /* Hide Chrome/Safari scroll */
   }
 
   .category-btn {
     inline-size: max-content;
     scroll-snap-align: start;
-    padding: 8px 16px;
-    background-color: var(--bg-main);
+    padding: 8px 18px;
+    background-color: var(--bg-surface-low);
     border: 1px solid var(--border-light);
+    border-radius: var(--radius-full); /* Premium capsule style */
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .category-btn.active {
     background-color: var(--primary-navy);
     border-color: var(--primary-navy);
+    color: var(--text-on-navy);
   }
 
   .store-info-card {
@@ -1523,22 +1528,71 @@ footer.app-footer {
   }
 }
 
-@media (max-inline-size: 768px) {
+@media (max-width: 768px) {
   .header-container {
-    flex-direction: column;
-    padding: var(--spacing-md);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 
+      "brand actions"
+      "search search";
+    padding: var(--spacing-sm) var(--spacing-md);
     gap: var(--spacing-sm);
     min-block-size: auto;
   }
   
+  .brand-wrapper {
+    grid-area: brand;
+  }
+
+  .brand-details h1 {
+    font-size: 1.15rem;
+  }
+
+  .brand-details .store-address {
+    display: none; /* Hide address on mobile headers for extreme clean aesthetic */
+  }
+  
   .header-search-wrapper {
+    grid-area: search;
     inline-size: 100%;
     max-inline-size: 100%;
   }
 
   .header-actions {
-    inline-size: 100%;
+    grid-area: actions;
+    inline-size: auto;
     justify-content: flex-end;
+    margin-block-start: 0;
+  }
+
+  /* Compact and structured vehicles filter bar on mobile */
+  .store-filters-bar {
+    padding: var(--spacing-md);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .hierarchical-filters-wrapper {
+    display: grid;
+    grid-template-columns: 1fr; /* Stacked vertically for clear readability on mobile */
+    gap: var(--spacing-sm);
+    inline-size: 100%;
+  }
+
+  .filter-item {
+    display: grid;
+    grid-template-columns: 80px 1fr; /* Beautiful alignment */
+    align-items: center;
+    inline-size: 100%;
+  }
+
+  .filter-select {
+    inline-size: 100%;
+  }
+
+  .results-meta {
+    text-align: center;
     margin-block-start: var(--spacing-xs);
   }
   
