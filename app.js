@@ -1,10 +1,24 @@
-/**
- * Accesorios Autocentro S.R.L. - Controladora Principal del E-commerce
- * Gestiona el carrito, búsquedas, filtrado jerárquico (Marca -> Modelo -> Año), categorías e integración con WhatsApp.
- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// --- FIREBASE WEB SDK INITIALIZATION ---
+const firebaseConfig = {
+  projectId: "carlitos-autopartes",
+  appId: "1:857884800045:web:19badd1649ae17712734a4",
+  storageBucket: "carlitos-autopartes.firebasestorage.app",
+  apiKey: "AIzaSyCgeSNL_oFVBK6UElLTtwnPWXAaogBTcDI",
+  authDomain: "carlitos-autopartes.firebaseapp.com",
+  messagingSenderId: "857884800045",
+  projectNumber: "857884800045"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- MAIN APPLICATION LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
   // --- STATE MACHINE ---
+  let products = []; // Populated dynamically in real-time from Firestore
   let cart = [];
   let selectedCategory = "Todos";
   let selectedBrand = "Todas";
@@ -50,15 +64,33 @@ document.addEventListener("DOMContentLoaded", () => {
       cart = [];
     }
 
-    // 2. Populate filters & Render views
-    populateBrandFilter();
-    updateCategoryCounts();
-    renderProducts();
-    renderCart();
+    // 2. Subscribe to Firestore catalog updates in real-time
+    subscribeToCatalog();
 
     // 3. Bind interactive actions
     bindEventListeners();
     setupInvokersFallback();
+  }
+
+  // --- SUBSCRIBE TO LIVE FIRESTORE COLLECTION ---
+  function subscribeToCatalog() {
+    onSnapshot(collection(db, "products"), (snapshot) => {
+      const items = [];
+      snapshot.forEach(doc => {
+        items.push(doc.data());
+      });
+      
+      // Update local catalog reactive state
+      products = items;
+
+      // Refresh selectors & grid reactively
+      populateBrandFilter();
+      updateCategoryCounts();
+      renderProducts();
+      renderCart();
+    }, (err) => {
+      console.error("Error en la suscripción de Firestore en tiempo real:", err);
+    });
   }
 
   // --- EVENT LISTENERS REGISTRATION ---
@@ -141,9 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function populateBrandFilter() {
     if (!brandFilter) return;
     
+    // Preserve active selection if still available in new dataset
+    const prevSelection = selectedBrand;
     brandFilter.innerHTML = '<option value="Todas">Todas las marcas</option>';
     
-    // Extract unique car brands (excluding Universal for cleaner vehicle selection dropdown)
+    // Extract unique car brands (excluding Universal)
     const brands = [...new Set(products
       .map(p => p.brand)
       .filter(brand => brand && brand !== "Universal"))]
@@ -155,6 +189,13 @@ document.addEventListener("DOMContentLoaded", () => {
       option.textContent = brand;
       brandFilter.appendChild(option);
     });
+
+    // Restore previous selection if valid
+    if (brands.includes(prevSelection)) {
+      brandFilter.value = prevSelection;
+    } else {
+      selectedBrand = "Todas";
+    }
   }
 
   // 2. Handle Brand selection -> cascade to Models
@@ -232,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         yearFilter.disabled = false;
       }
     }
- 
+
     renderProducts();
   }
 
@@ -287,14 +328,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- STATIC CATEGORY COUNT BADGES ---
   function updateCategoryCounts() {
-    // Calculates absolute amount of items in database per category
     const counts = { Todos: products.length };
     
     products.forEach(p => {
       counts[p.category] = (counts[p.category] || 0) + 1;
     });
 
-    // Map keys to specific element IDs in sidebar
     const badgeMap = {
       "Todos": "count-Todos",
       "Faros y Ópticas": "count-Faros-Opticas",
@@ -327,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 1. Category Filter Match
       const matchesCategory = selectedCategory === "Todos" || p.category === selectedCategory;
       
-      // 2. Hierarchical vehicle compatibility match (Universal parts always visible to maximize sales)
+      // 2. Hierarchical vehicle compatibility match (Universal parts always visible)
       const matchesBrand = selectedBrand === "Todas" || p.brand === selectedBrand || p.brand === "Universal";
       
       const matchesModel = selectedModel === "Todos" || p.model === selectedModel || p.model === "Todos" || p.brand === "Universal";
@@ -585,7 +624,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function sendOrderViaWhatsApp() {
     if (cart.length === 0) return;
 
-    // 1. Build beautiful WhatsApp markdown text
     let message = "Hola Accesorios Autocentro! Me gustaría realizar el siguiente pedido:\n\n";
     
     let subtotal = 0;
@@ -598,12 +636,10 @@ document.addEventListener("DOMContentLoaded", () => {
     message += `\n*Total del Pedido: ${formatARS(subtotal)}*\n\n`;
     message += "¿Tienen disponibilidad para retirar por el local de *Corrientes 579*?";
 
-    // 2. Encode values
     const whatsappNum = "5493416055274";
     const encodedText = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNum}?text=${encodedText}`;
 
-    // 3. Open URL in a new tab securely
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 });
