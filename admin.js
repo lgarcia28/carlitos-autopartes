@@ -25,7 +25,9 @@ const firebaseConfig = {
   appId: "1:857884800045:web:19badd1649ae17712734a4",
   storageBucket: "carlitos-autopartes.firebasestorage.app",
   apiKey: "AIzaSyCgeSNL_oFVBK6UElLTtwnPWXAaogBTcDI",
-  authDomain: "carlitos-autopartes.firebaseapp.com",
+  authDomain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+    ? "carlitos-autopartes.firebaseapp.com" 
+    : window.location.hostname,
   messagingSenderId: "857884800045",
   projectNumber: "857884800045"
 };

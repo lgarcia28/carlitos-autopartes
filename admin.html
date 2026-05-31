@@ -360,6 +360,39 @@
 </head>
 <body class="admin-body">
 
+  <!-- DIAGNÓSTICO EN PANTALLA: Captura y muestra cualquier error de JavaScript -->
+  <div id="diagnostico-error-box" style="display: none; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #FEE2E2; border: 2px solid #DC2626; color: #DC2626; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left; box-shadow: var(--shadow-lg);">
+    <h3 style="margin-top: 0; color: #991B1B; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+      ⚠️ Error de Sistema (Diagnóstico)
+    </h3>
+    <p style="margin-bottom: 10px; color: #7F1D1D;">Se detectó una falla al inicializar la página o durante la autenticación. Compartinos el texto de abajo:</p>
+    <pre id="diagnostico-error-content" style="white-space: pre-wrap; background: white; padding: 10px; border-radius: 4px; border: 1px solid #FCA5A5; max-height: 250px; overflow-y: auto; color: #374151; font-weight: bold;"></pre>
+    <button onclick="document.getElementById('diagnostico-error-box').style.display='none'" style="margin-top: 12px; padding: 6px 12px; background-color: #DC2626; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Cerrar Diagnóstico</button>
+  </div>
+  <script>
+    // Captura errores globales de sintaxis o de importación de scripts/módulos
+    window.addEventListener('error', function(e) {
+      document.getElementById('diagnostico-error-box').style.display = 'block';
+      const msg = e.message || 'Error de carga/importación de recurso (ej. Firebase CDN)';
+      const source = e.filename ? ('\nArchivo: ' + e.filename + '\nLínea: ' + e.lineno) : '';
+      document.getElementById('diagnostico-error-content').textContent += '\n[ERROR] ' + msg + source;
+    }, true); // Use capture phase to catch resource loading errors too
+
+    // Captura promesas rechazadas (como fallas del SDK de Firebase Auth)
+    window.addEventListener('unhandledrejection', function(e) {
+      document.getElementById('diagnostico-error-box').style.display = 'block';
+      const reason = e.reason;
+      let msg = 'Rechazo de promesa desconocido';
+      if (reason) {
+        msg = reason.message || reason.code || JSON.stringify(reason);
+        if (reason.stack) {
+          msg += '\nStack:\n' + reason.stack;
+        }
+      }
+      document.getElementById('diagnostico-error-content').textContent += '\n[PROMESA RECHAZADA] ' + msg;
+    });
+  </script>
+
   <!-- ================= STATE 1: LOGIN PANEL ================= -->
   <div id="login-view" class="login-container" style="max-inline-size: 400px; text-align: center; margin-block-start: 120px;">
     <div class="login-header">
