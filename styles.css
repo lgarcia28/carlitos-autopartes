@@ -57,6 +57,7 @@ html {
   background-color: var(--bg-main);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 body {
@@ -1025,7 +1026,7 @@ dialog.cart-drawer {
   border: none;
   background-color: var(--bg-surface);
   box-shadow: var(--shadow-dialog);
-  display: flex;
+  display: none; /* Hide when closed to prevent iOS Safari horizontal layout stretch */
   flex-direction: column;
   overflow: hidden;
   
@@ -1040,6 +1041,7 @@ dialog.cart-drawer {
 
 /* Visible (open) state */
 dialog.cart-drawer[open] {
+  display: flex; /* Show as flex grid when open */
   transform: translateX(0);
   opacity: 1;
 
