@@ -87,6 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function revealCatalog(shouldScroll = true) {
+    const mainContainer = document.getElementById("storefront");
+    if (mainContainer && !mainContainer.classList.contains("revealed")) {
+      mainContainer.classList.add("revealed");
+      if (shouldScroll) {
+        setTimeout(() => {
+          mainContainer.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+      }
+    }
+  }
+
   // --- SUBSCRIBE TO LIVE FIRESTORE COLLECTION ---
   function subscribeToCatalog() {
     onSnapshot(collection(db, "products"), (snapshot) => {
@@ -108,8 +120,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- EVENT LISTENERS REGISTRATION ---
   function bindEventListeners() {
+    // 0. Immersive Welcoming CTAs Click Reveal Handler
+    const viewCatalogBtn = document.querySelector(".intro-primary-btn");
+    if (viewCatalogBtn) {
+      viewCatalogBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        revealCatalog(true);
+      });
+    }
+
+    if (cartToggleBtn) {
+      cartToggleBtn.addEventListener("click", () => {
+        revealCatalog(false); // silently reveal behind the overlay
+      });
+    }
+
     // Mobile Filters Toggle Button Click Handler
     const filterToggle = document.getElementById("mobile-filter-toggle");
     const sidebar = document.querySelector("aside.filter-sidebar");
@@ -145,15 +171,12 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const cat = link.dataset.footerCategory;
         
+        revealCatalog(true); // Reveal the catalog with animation and scroll
+        
         // Find matching sidebar button
         const sidebarBtn = document.querySelector(`.category-btn[data-category="${cat}"]`);
         if (sidebarBtn) {
           sidebarBtn.click();
-          // Scroll page to catalog
-          const storefrontSec = document.getElementById("storefront");
-          if (storefrontSec) {
-            storefrontSec.scrollIntoView({ behavior: "smooth" });
-          }
         }
       });
     });
@@ -161,8 +184,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // C. Instant Keyboard Search
     searchInput.addEventListener("input", (e) => {
       searchQuery = e.target.value.trim().toLowerCase();
+      if (searchQuery.length > 0) {
+        revealCatalog(false); // Reveal silently without disturbing scroll focus
+      }
       renderProducts();
     });
+
+    const searchForm = document.getElementById("search-form");
+    if (searchForm) {
+      searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        revealCatalog(true); // Reveal and scroll down on form submit
+      });
+    }
 
     // D. Hierarchical Select Filters Bindings
     brandFilter.addEventListener("change", (e) => {
