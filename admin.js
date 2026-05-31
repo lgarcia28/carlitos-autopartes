@@ -2,7 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { 
   getAuth, 
   GoogleAuthProvider,
-  signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   signOut, 
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -79,6 +80,25 @@ if (imgbbApiKey) {
   imgbbKeyInput.value = imgbbApiKey;
 }
 
+// --- CAPTURE REDIRECT RESULT (Para capturar errores o éxito post-redirección) ---
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      console.log("Sesión iniciada vía redirección:", result.user.email);
+      showToast("¡Autenticación completada con éxito!", "success");
+    }
+  })
+  .catch((err) => {
+    console.error("Error al retornar de la redirección de Google:", err);
+    let errorMsg = "Error al iniciar sesión con Google. Intentá de nuevo.";
+    if (err.code === "auth/unauthorized-domain") {
+      errorMsg = "Este dominio no está autorizado en la consola de Firebase.";
+    } else if (err.code === "auth/operation-not-allowed") {
+      errorMsg = "El proveedor de Google no está habilitado en Firebase.";
+    }
+    showToast(errorMsg, "error");
+  });
+
 // --- AUTHENTICATION STATE OBSERVER ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -105,7 +125,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- AUTH ACTIONS (Google Sign-In Popup) ---
+// --- AUTH ACTIONS (Google Sign-In Redirect) ---
 googleLoginBtn.addEventListener("click", async () => {
   const provider = new GoogleAuthProvider();
   // Request profile and email scopes
@@ -113,16 +133,12 @@ googleLoginBtn.addEventListener("click", async () => {
   provider.addScope("email");
 
   try {
-    showToast("Abriendo inicio de sesión de Google...", "info");
-    await signInWithPopup(auth, provider);
-    showToast("¡Autenticación completada con éxito!", "success");
+    showToast("Redirigiendo a inicio de sesión de Google...", "info");
+    // Usamos redirección para evitar bloqueadores de popups, especialmente en celulares
+    await signInWithRedirect(auth, provider);
   } catch (err) {
-    console.error("Error al iniciar sesión con Google:", err);
-    let errorMsg = "Error al conectar con Google. Intentá de nuevo.";
-    if (err.code === "auth/popup-closed-by-user") {
-      errorMsg = "Inicio de sesión cancelado por el usuario.";
-    }
-    showToast(errorMsg, "error");
+    console.error("Error al iniciar redirección de Google:", err);
+    showToast("Error al iniciar sesión con Google. Intentá de nuevo.", "error");
   }
 });
 
