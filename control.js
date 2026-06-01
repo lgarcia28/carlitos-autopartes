@@ -75,9 +75,7 @@ const prodImageUrl = document.getElementById("prod-image-url");
 const imagePreview = document.getElementById("image-preview");
 const uploadStatus = document.getElementById("upload-status");
 
-// Settings & Listing
-const imgbbKeyInput = document.getElementById("imgbb-key");
-const saveSettingsBtn = document.getElementById("save-settings-btn");
+// Listing
 const adminProductsList = document.getElementById("admin-products-list");
 const adminResultsCount = document.getElementById("admin-results-count");
 
@@ -87,10 +85,7 @@ const adminCategoryFilter = document.getElementById("admin-category-filter");
 const adminResetFilters = document.getElementById("admin-reset-filters");
 
 // --- INITIAL STATES & SETUP ---
-let imgbbApiKey = localStorage.getItem("autocentro_imgbb_key") || "";
-if (imgbbApiKey) {
-  imgbbKeyInput.value = imgbbApiKey;
-}
+let imgbbApiKey = localStorage.getItem("autocentro_imgbb_key") || "3e8f85f1c4e77248e3e44ebf996d99df";
 let allProducts = [];
 
 // --- AUTHENTICATION STATE OBSERVER ---
@@ -164,17 +159,7 @@ logoutBtn.addEventListener("click", async () => {
   }
 });
 
-// --- SETTINGS ACTIONS ---
-saveSettingsBtn.addEventListener("click", () => {
-  const key = imgbbKeyInput.value.trim();
-  if (key) {
-    imgbbApiKey = key;
-    localStorage.setItem("autocentro_imgbb_key", key);
-    showToast("Clave API de ImgBB guardada correctamente.", "success");
-  } else {
-    showToast("Por favor ingresa una clave válida.", "error");
-  }
-});
+
 
 // --- FILE UPLOAD INTERACTION (Camera & Preview) ---
 prodImageFile.addEventListener("change", (e) => {
