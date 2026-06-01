@@ -87,6 +87,7 @@ const adminResetFilters = document.getElementById("admin-reset-filters");
 // --- INITIAL STATES & SETUP ---
 let imgbbApiKey = localStorage.getItem("autocentro_imgbb_key") || "3e8f85f1c4e77248e3e44ebf996d99df";
 let allProducts = [];
+let catalogUnsubscribe = null;
 
 // --- AUTHENTICATION STATE OBSERVER ---
 onAuthStateChanged(auth, (user) => {
@@ -360,7 +361,6 @@ async function saveInlineUpdate(id, price, stock, name) {
 }
 
 // --- SUBSCRIBE TO LIVE FIRESTORE DATABASE ---
-let catalogUnsubscribe = null;
 function subscribeToCatalog() {
   if (catalogUnsubscribe) {
     catalogUnsubscribe();
