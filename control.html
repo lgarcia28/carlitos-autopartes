@@ -479,6 +479,24 @@
         font-size: 1.3rem !important;
       }
     }
+
+    .admin-filters-container {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-block-end: var(--spacing-md);
+      background-color: var(--bg-surface-low);
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .admin-filter-control {
+      padding: 8px 12px !important;
+      font-size: 0.8rem !important;
+      font-weight: 600 !important;
+      min-block-size: 36px;
+    }
   </style>
 </head>
 <body class="admin-body">
@@ -684,6 +702,38 @@
           <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;" id="admin-results-count">Cargando catálogo...</span>
         </h3>
         
+        <!-- Admin Filters Row -->
+        <div class="admin-filters-container">
+          <input 
+            type="text" 
+            id="admin-search-filter" 
+            class="form-control admin-filter-control" 
+            placeholder="🔍 Buscar por nombre, marca o modelo..." 
+            style="flex: 2; min-width: 200px;"
+          >
+          <select 
+            id="admin-category-filter" 
+            class="form-control admin-filter-control" 
+            style="flex: 1; min-width: 150px;"
+          >
+            <option value="ALL">Todas las Categorías</option>
+            <option value="Faros y Ópticas">Faros y Ópticas</option>
+            <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
+            <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
+            <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
+            <option value="Tazas y Molduras">Tazas y Molduras</option>
+          </select>
+          <button 
+            id="admin-reset-filters" 
+            class="admin-btn admin-btn-danger admin-filter-control" 
+            style="border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 16px !important;"
+            title="Limpiar filtros"
+            type="button"
+          >
+            Restaurar
+          </button>
+        </div>
+
         <div class="products-list-wrapper" id="admin-products-list">
           <!-- Rendered dynamically by admin.js -->
         </div>

@@ -77,11 +77,17 @@ const saveSettingsBtn = document.getElementById("save-settings-btn");
 const adminProductsList = document.getElementById("admin-products-list");
 const adminResultsCount = document.getElementById("admin-results-count");
 
+// Advanced Live Filters
+const adminSearchFilter = document.getElementById("admin-search-filter");
+const adminCategoryFilter = document.getElementById("admin-category-filter");
+const adminResetFilters = document.getElementById("admin-reset-filters");
+
 // --- INITIAL STATES & SETUP ---
 let imgbbApiKey = localStorage.getItem("autocentro_imgbb_key") || "";
 if (imgbbApiKey) {
   imgbbKeyInput.value = imgbbApiKey;
 }
+let allProducts = [];
 
 // --- AUTHENTICATION STATE OBSERVER ---
 onAuthStateChanged(auth, (user) => {
@@ -359,6 +365,7 @@ function subscribeToCatalog() {
   catalogUnsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
     // If database is completely empty, suggest seed migration
     if (snapshot.empty) {
+      allProducts = [];
       adminResultsCount.textContent = "Base de datos vacía (0 productos)";
       renderSeedMigrationOffer();
       return;
@@ -372,13 +379,44 @@ function subscribeToCatalog() {
     // Sort by updated_at or created_at descending (newest first)
     prods.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
 
-    adminResultsCount.textContent = `${prods.length} ${prods.length === 1 ? "repuesto" : "repuestos"} en catálogo`;
-    renderAdminProducts(prods);
+    allProducts = prods;
+    applyAdminFilters();
   }, (err) => {
     console.error("Error en suscripción en vivo:", err);
     showToast("Error cargando base de datos. Comprobá conexión.", "error");
   });
 }
+
+// --- APPLY LIVE FILTERS FOR ADMIN CATALOG ---
+function applyAdminFilters() {
+  const query = adminSearchFilter.value.toLowerCase().trim();
+  const category = adminCategoryFilter.value;
+
+  const filtered = allProducts.filter(prod => {
+    const matchesSearch = !query || 
+      (prod.name && prod.name.toLowerCase().includes(query)) ||
+      (prod.brand && prod.brand.toLowerCase().includes(query)) ||
+      (prod.model && prod.model.toLowerCase().includes(query)) ||
+      (prod.description && prod.description.toLowerCase().includes(query));
+
+    const matchesCategory = category === "ALL" || prod.category === category;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  adminResultsCount.textContent = `${filtered.length} de ${allProducts.length} ${allProducts.length === 1 ? "repuesto" : "repuestos"}`;
+  renderAdminProducts(filtered);
+}
+
+// --- EVENT LISTENERS FOR ADVANCED FILTERS ---
+adminSearchFilter.addEventListener("input", applyAdminFilters);
+adminCategoryFilter.addEventListener("change", applyAdminFilters);
+adminResetFilters.addEventListener("click", () => {
+  adminSearchFilter.value = "";
+  adminCategoryFilter.value = "ALL";
+  applyAdminFilters();
+  showToast("Filtros limpiados.", "info");
+});
 
 // --- RENDER PRODUCTS GRID FOR ADMIN ---
 function renderAdminProducts(productsArray) {
