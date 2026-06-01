@@ -500,9 +500,11 @@
       background: transparent;
       max-width: 540px;
       width: 90%;
+      max-height: 90dvh; /* dynamic height limit */
       box-shadow: var(--shadow-dialog);
       outline: none;
-      overflow: visible; /* lets close button float cleanly if needed */
+      overflow-y: auto; /* vertical scroll support */
+      scrollbar-gutter: stable;
     }
     dialog#product-modal::backdrop {
       background-color: rgba(11, 37, 69, 0.4);
@@ -626,122 +628,122 @@
       </div>
     </nav>
 
-    <!-- Main Layout -->
-    <div class="admin-layout">
-      
-      <!-- MODAL DIALOG CONTAINER FOR ADD / EDIT FORM -->
-      <dialog id="product-modal">
-        <section class="admin-card" style="position: relative;">
-          <button type="button" class="close-modal-btn" id="close-modal-x" title="Cerrar ventana">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="inline-size: 20px; block-size: 20px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <h3 class="admin-card-title" style="padding-inline-end: 24px;">
-            <span id="form-action-title">Cargar Producto Nuevo</span>
-            <button id="cancel-edit-btn" class="admin-btn-danger" style="display: none; padding: 4px 8px; font-size: 0.7rem; border-radius: var(--radius-sm);">Cancelar</button>
-          </h3>
+    <!-- MODAL DIALOG CONTAINER FOR ADD / EDIT FORM (Moved outside of grid for 100% mobile rendering success) -->
+    <dialog id="product-modal">
+      <section class="admin-card" style="position: relative;">
+        <button type="button" class="close-modal-btn" id="close-modal-x" title="Cerrar ventana">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="inline-size: 20px; block-size: 20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h3 class="admin-card-title" style="padding-inline-end: 24px;">
+          <span id="form-action-title">Cargar Producto Nuevo</span>
+          <button id="cancel-edit-btn" class="admin-btn-danger" style="display: none; padding: 4px 8px; font-size: 0.7rem; border-radius: var(--radius-sm);">Cancelar</button>
+        </h3>
+        
+        <!-- API Settings Box (Hidden by default or toggled) -->
+        <div class="settings-panel">
+          <div class="form-group">
+            <label for="imgbb-key" class="form-label" style="font-size: 0.7rem;">ImgBB API Key (Para fotos sin tarjeta)</label>
+            <div style="display: flex; gap: var(--spacing-xs);">
+              <input 
+                type="password" 
+                id="imgbb-key" 
+                class="form-control" 
+                placeholder="Pegá tu API key de ImgBB" 
+                style="padding: 6px 10px; font-size: 0.75rem; flex: 1;"
+              >
+              <button id="save-settings-btn" class="admin-btn admin-btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">Guardar</button>
+            </div>
+            <p style="font-size: 0.65rem; color: var(--text-secondary); margin-block-start: 4px;">
+              Obtenela gratis en 10 segundos registrándote en <a href="https://api.imgbb.com/" target="_blank" style="text-decoration: underline; color: var(--primary-navy); font-weight: 600;">api.imgbb.com</a>.
+            </p>
+          </div>
+        </div>
+
+        <form id="product-form" class="admin-form">
+          <input type="hidden" id="edit-product-id">
           
-          <!-- API Settings Box (Hidden by default or toggled) -->
-          <div class="settings-panel">
+          <div class="form-group">
+            <label for="prod-name" class="form-label">Nombre del Repuesto</label>
+            <input type="text" id="prod-name" class="form-control" placeholder="Ej. Faro Trasero Hilux 2020" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-desc" class="form-label">Descripción Detallada</label>
+            <input type="text" id="prod-desc" class="form-control" placeholder="Ej. Faro trasero con lamparilla acrílica de alta resistencia" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-category" class="form-label">Categoría</label>
+            <select id="prod-category" class="form-control" required>
+              <option value="Faros y Ópticas">Faros y Ópticas</option>
+              <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
+              <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
+              <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
+              <option value="Tazas y Molduras">Tazas y Molduras</option>
+            </select>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
-              <label for="imgbb-key" class="form-label" style="font-size: 0.7rem;">ImgBB API Key (Para fotos sin tarjeta)</label>
-              <div style="display: flex; gap: var(--spacing-xs);">
-                <input 
-                  type="password" 
-                  id="imgbb-key" 
-                  class="form-control" 
-                  placeholder="Pegá tu API key de ImgBB" 
-                  style="padding: 6px 10px; font-size: 0.75rem; flex: 1;"
-                >
-                <button id="save-settings-btn" class="admin-btn admin-btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">Guardar</button>
-              </div>
-              <p style="font-size: 0.65rem; color: var(--text-secondary); margin-block-start: 4px;">
-                Obtenela gratis en 10 segundos registrándote en <a href="https://api.imgbb.com/" target="_blank" style="text-decoration: underline; color: var(--primary-navy); font-weight: 600;">api.imgbb.com</a>.
-              </p>
+              <label for="prod-brand" class="form-label">Marca Auto (o Universal)</label>
+              <input type="text" id="prod-brand" class="form-control" placeholder="Ej. Toyota" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-model" class="form-label">Modelo específico</label>
+              <input type="text" id="prod-model" class="form-control" placeholder="Ej. Hilux" required>
             </div>
           </div>
 
-          <form id="product-form" class="admin-form">
-            <input type="hidden" id="edit-product-id">
-            
+          <div class="form-row">
             <div class="form-group">
-              <label for="prod-name" class="form-label">Nombre del Repuesto</label>
-              <input type="text" id="prod-name" class="form-control" placeholder="Ej. Faro Trasero Hilux 2020" required>
+              <label for="prod-year-start" class="form-label">Año Inicio</label>
+              <input type="number" id="prod-year-start" class="form-control" placeholder="Ej. 2016" value="2016" required>
             </div>
-
             <div class="form-group">
-              <label for="prod-desc" class="form-label">Descripción Detallada</label>
-              <input type="text" id="prod-desc" class="form-control" placeholder="Ej. Faro trasero con lamparilla acrílica de alta resistencia" required>
+              <label for="prod-year-end" class="form-label">Año Fin</label>
+              <input type="number" id="prod-year-end" class="form-control" placeholder="Ej. 2026" value="2026" required>
             </div>
+          </div>
 
+          <div class="form-row">
             <div class="form-group">
-              <label for="prod-category" class="form-label">Categoría</label>
-              <select id="prod-category" class="form-control" required>
-                <option value="Faros y Ópticas">Faros y Ópticas</option>
-                <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
-                <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
-                <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
-                <option value="Tazas y Molduras">Tazas y Molduras</option>
-              </select>
+              <label for="prod-price" class="form-label">Precio ($ ARS)</label>
+              <input type="number" id="prod-price" class="form-control" placeholder="12500" required>
             </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="prod-brand" class="form-label">Marca Auto (o Universal)</label>
-                <input type="text" id="prod-brand" class="form-control" placeholder="Ej. Toyota" required>
-              </div>
-              <div class="form-group">
-                <label for="prod-model" class="form-label">Modelo específico</label>
-                <input type="text" id="prod-model" class="form-control" placeholder="Ej. Hilux" required>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="prod-year-start" class="form-label">Año Inicio</label>
-                <input type="number" id="prod-year-start" class="form-control" placeholder="Ej. 2016" value="2016" required>
-              </div>
-              <div class="form-group">
-                <label for="prod-year-end" class="form-label">Año Fin</label>
-                <input type="number" id="prod-year-end" class="form-control" placeholder="Ej. 2026" value="2026" required>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="prod-price" class="form-label">Precio ($ ARS)</label>
-                <input type="number" id="prod-price" class="form-control" placeholder="12500" required>
-              </div>
-              <div class="form-group">
-                <label for="prod-stock" class="form-label">Stock Disp.</label>
-                <input type="number" id="prod-stock" class="form-control" placeholder="10" value="10" required>
-              </div>
-            </div>
-
             <div class="form-group">
-              <label class="form-label">Foto del Repuesto (Cámara o Galería)</label>
-              <div class="file-upload-wrapper" id="file-drop-zone">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="upload-icon">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                </svg>
-                <span id="upload-status" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Elegir foto o sacar foto con la cámara</span>
-                <!-- Native accept for camera trigger on mobile -->
-                <input type="file" id="prod-image-file" accept="image/*">
-                <img id="image-preview" class="upload-preview" alt="Vista previa de foto">
-              </div>
-              <!-- String fallback in case edit preserves old image -->
-              <input type="hidden" id="prod-image-url">
+              <label for="prod-stock" class="form-label">Stock Disp.</label>
+              <input type="number" id="prod-stock" class="form-control" placeholder="10" value="10" required>
             </div>
+          </div>
 
-            <button type="submit" class="admin-btn admin-btn-accent" id="save-product-btn" style="margin-block-start: var(--spacing-xs);">
-              <span>Guardar Producto</span>
-            </button>
-          </form>
-        </section>
-      </dialog>
+          <div class="form-group">
+            <label class="form-label">Foto del Repuesto (Cámara o Galería)</label>
+            <div class="file-upload-wrapper" id="file-drop-zone">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="upload-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+              </svg>
+              <span id="upload-status" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Elegir foto o sacar foto con la cámara</span>
+              <!-- Native accept for camera trigger on mobile -->
+              <input type="file" id="prod-image-file" accept="image/*">
+              <img id="image-preview" class="upload-preview" alt="Vista previa de foto">
+            </div>
+            <!-- String fallback in case edit preserves old image -->
+            <input type="hidden" id="prod-image-url">
+          </div>
 
+          <button type="submit" class="admin-btn admin-btn-accent" id="save-product-btn" style="margin-block-start: var(--spacing-xs);">
+            <span>Guardar Producto</span>
+          </button>
+        </form>
+      </section>
+    </dialog>
+
+    <!-- Main Layout -->
+    <div class="admin-layout">
+      
       <!-- RIGHT COLUMN: PRODUCTS LIST -->
       <section class="admin-card">
         <h3 class="admin-card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm);">
