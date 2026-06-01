@@ -356,6 +356,129 @@
       background-color: rgba(255, 255, 255, 0.1);
       border-color: white;
     }
+
+    /* ==========================================================================
+       MEDIA QUERIES - RESPONSIVE CORRECTIONS FOR MOBILE DEVICES
+       ========================================================================== */
+    @media (max-width: 768px) {
+      /* Dynamic & adaptive main container margins */
+      .admin-layout {
+        margin: var(--spacing-md) auto !important;
+        padding: 0 var(--spacing-md) !important;
+        gap: var(--spacing-md) !important;
+      }
+      
+      .admin-card {
+        padding: var(--spacing-md) !important;
+        gap: var(--spacing-sm) !important;
+      }
+
+      /* Stack navbar elements to prevent collision */
+      .admin-nav-container {
+        flex-direction: column !important;
+        gap: var(--spacing-sm) !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      
+      .admin-logo {
+        font-size: 1.1rem !important;
+      }
+      
+      .admin-nav-actions {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: var(--spacing-md) !important;
+      }
+
+      /* Form inputs to full-width vertically */
+      .form-row {
+        grid-template-columns: 1fr !important;
+        gap: var(--spacing-sm) !important;
+      }
+
+      /* 2D CSS Grid Layout for Product Cards (No more overlaps) */
+      .manage-item-card {
+        display: grid !important;
+        grid-template-columns: 60px 1fr !important;
+        grid-template-rows: auto auto !important;
+        gap: var(--spacing-sm) var(--spacing-md) !important;
+        padding: var(--spacing-md) !important;
+        align-items: center !important;
+      }
+      
+      .manage-item-img {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        align-self: center !important;
+      }
+      
+      .manage-item-info {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        justify-content: center !important;
+      }
+      
+      /* Actions & inline quick-edit inputs section */
+      .manage-item-inputs {
+        grid-column: 1 / span 2 !important;
+        grid-row: 2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: var(--spacing-xs) !important;
+        border-top: 1px dashed var(--border-light) !important;
+        padding-top: var(--spacing-sm) !important;
+        margin-top: 4px !important;
+        flex-wrap: wrap !important; /* Elegant wrap on ultra-narrow viewports */
+      }
+      
+      .inline-input-group {
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        justify-content: flex-start !important;
+      }
+      
+      .inline-input {
+        flex: 1 !important;
+        min-inline-size: 60px !important;
+        max-inline-size: 90px !important;
+        inline-size: auto !important; /* Override standard width */
+        padding: 6px 8px !important;
+      }
+      
+      .fast-save-btn {
+        flex: 1 1 auto !important;
+        text-align: center !important;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-block-size: 34px !important;
+      }
+      
+      .inline-delete-btn {
+        flex: 1 1 auto !important;
+        text-align: center !important;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-block-size: 34px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Login panel styling fixes */
+      .login-container {
+        margin: 40px auto !important;
+        max-inline-size: calc(100% - 32px) !important;
+        padding: var(--spacing-md) !important;
+        gap: var(--spacing-sm) !important;
+      }
+      
+      .login-header h2 {
+        font-size: 1.3rem !important;
+      }
+    }
   </style>
 </head>
 <body class="admin-body">
