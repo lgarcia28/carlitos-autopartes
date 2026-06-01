@@ -49,7 +49,11 @@ const loginPassword = document.getElementById("login-password");
 const logoutBtn = document.getElementById("logout-btn");
 const userEmailTag = document.getElementById("user-email-tag");
 
-// Product Form
+// Product Form & Modal Overlay
+const productModal = document.getElementById("product-modal");
+const openModalBtn = document.getElementById("open-modal-btn");
+const closeModalX = document.getElementById("close-modal-x");
+
 const productForm = document.getElementById("product-form");
 const editProductId = document.getElementById("edit-product-id");
 const formActionTitle = document.getElementById("form-action-title");
@@ -287,6 +291,20 @@ productForm.addEventListener("submit", async (e) => {
   }
 });
 
+// --- MODAL & FORM TRIGGER EVENTS ---
+openModalBtn.addEventListener("click", () => {
+  resetFormState();
+  productModal.showModal();
+});
+
+closeModalX.addEventListener("click", () => {
+  resetFormState();
+});
+
+cancelEditBtn.addEventListener("click", () => {
+  resetFormState();
+});
+
 // --- EDIT SELECTION TRIGGER ---
 function editProduct(prod) {
   editProductId.value = prod.id;
@@ -308,13 +326,9 @@ function editProduct(prod) {
   imagePreview.style.display = "block";
   uploadStatus.textContent = "Foto guardada activa. Subí otra para reemplazarla.";
   
-  // Scroll form into view
-  productForm.scrollIntoView({ behavior: "smooth" });
+  // Open the interactive dialog
+  productModal.showModal();
 }
-
-cancelEditBtn.addEventListener("click", () => {
-  resetFormState();
-});
 
 function resetFormState() {
   productForm.reset();
@@ -325,6 +339,11 @@ function resetFormState() {
   imagePreview.style.display = "none";
   imagePreview.src = "";
   uploadStatus.textContent = "Elegir foto o sacar foto con la cámara";
+  
+  // Close dialog safely if open
+  if (productModal.open) {
+    productModal.close();
+  }
 }
 
 // --- DELETE ACTION ---
