@@ -12,6 +12,17 @@
       "seed-rest.cjs",
       "package.json",
       "package-lock.json"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js|json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
     ]
   },
   "firestore": {
