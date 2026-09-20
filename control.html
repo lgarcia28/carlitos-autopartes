@@ -539,6 +539,282 @@
       color: #DC2626;
       transform: rotate(90deg);
     }
+
+    /* ==========================================================================
+       ERP SYSTEM STYLES (Tabs, Tables, Badges, Modals, Finance Cards)
+       ========================================================================== */
+    .erp-tabs-bar {
+      background-color: var(--secondary-navy);
+      display: flex;
+      gap: 6px;
+      padding: 8px var(--spacing-lg);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      border-block-end: 2px solid rgba(255, 255, 255, 0.08);
+    }
+    .erp-tabs-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .erp-tab {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .erp-tab:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: white;
+    }
+    .erp-tab.active {
+      background-color: var(--accent-yellow);
+      color: var(--primary-navy);
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    /* View Containers */
+    .erp-view {
+      display: none;
+      animation: erp-view-fade 0.25s ease forwards;
+    }
+    .erp-view.active {
+      display: block;
+    }
+    @keyframes erp-view-fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Generic ERP Modal */
+    dialog.erp-modal {
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0;
+      background: transparent;
+      max-width: 860px;
+      width: 95%;
+      max-height: 92dvh;
+      box-shadow: var(--shadow-dialog);
+      outline: none;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      margin: auto;
+    }
+    dialog.erp-modal::backdrop {
+      background-color: rgba(11, 37, 69, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    dialog.erp-modal[open] {
+      animation: modal-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Tables */
+    .erp-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface);
+      margin-block-start: var(--spacing-sm);
+    }
+    .erp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+    .erp-table th {
+      background-color: var(--bg-surface-low);
+      color: var(--primary-navy);
+      font-weight: 700;
+      padding: 10px 14px;
+      border-block-end: 2px solid var(--border-light);
+      white-space: nowrap;
+    }
+    .erp-table td {
+      padding: 10px 14px;
+      border-block-end: 1px solid var(--border-light);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .erp-table tr:last-child td {
+      border-block-end: none;
+    }
+    .erp-table tr:hover td {
+      background-color: #F8FAFC;
+    }
+
+    /* Badges */
+    .erp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .erp-badge-success {
+      background-color: #DCFCE7;
+      color: #15803D;
+    }
+    .erp-badge-warning {
+      background-color: #FEF3C7;
+      color: #B45309;
+    }
+    .erp-badge-danger {
+      background-color: #FEE2E2;
+      color: #B91C1C;
+    }
+    .erp-badge-info {
+      background-color: #E0F2FE;
+      color: #0369A1;
+    }
+    .erp-badge-neutral {
+      background-color: #F1F5F9;
+      color: #475569;
+    }
+
+    /* KPI Summary Grids */
+    .finance-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--spacing-md);
+      margin-block-end: var(--spacing-lg);
+    }
+    .finance-kpi-card {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      padding: var(--spacing-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-inline-start: 4px solid var(--primary-navy);
+    }
+    .finance-kpi-card.accent {
+      border-inline-start-color: var(--accent-yellow);
+    }
+    .finance-kpi-card.success {
+      border-inline-start-color: #10B981;
+    }
+    .finance-kpi-card.warning {
+      border-inline-start-color: #F59E0B;
+    }
+    .finance-kpi-card.danger {
+      border-inline-start-color: #EF4444;
+    }
+    .kpi-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    .kpi-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--primary-navy);
+      font-family: 'Outfit', sans-serif;
+    }
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Subtotal & Tax Box inside Invoices */
+    .invoice-totals-box {
+      background-color: var(--bg-surface-low);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-block-start: var(--spacing-sm);
+    }
+    .invoice-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .invoice-total-row.highlight {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-navy);
+      border-block-start: 1.5px solid var(--border-light);
+      padding-block-start: 6px;
+      margin-block-start: 4px;
+    }
+
+    /* Voucher Print Styling */
+    .voucher-container {
+      background: white;
+      padding: 24px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      color: #1E293B;
+      font-family: 'Inter', sans-serif;
+    }
+    .voucher-header {
+      display: flex;
+      justify-content: space-between;
+      border-block-end: 2px solid var(--primary-navy);
+      padding-block-end: 14px;
+      margin-block-end: 16px;
+    }
+    .voucher-type-box {
+      border: 2px solid var(--primary-navy);
+      padding: 6px 14px;
+      text-align: center;
+      background-color: #F8FAFC;
+    }
+    .voucher-type-letter {
+      font-size: 1.75rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--primary-navy);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-modal, #print-modal * {
+        visibility: visible !important;
+      }
+      #print-modal {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body class="admin-body">
@@ -619,7 +895,7 @@
     <nav class="admin-navbar">
       <div class="admin-nav-container">
         <div class="admin-logo">
-          <span>Accesorios Autocentro - Panel Admin</span>
+          <span>Carlitos Autopartes - Panel Comercial & Gestión</span>
         </div>
         <div class="admin-nav-actions">
           <span class="user-tag" id="user-email-tag">admin@autocentro.com</span>
@@ -628,7 +904,502 @@
       </div>
     </nav>
 
-    <!-- MODAL DIALOG CONTAINER FOR ADD / EDIT FORM (Moved outside of grid for 100% mobile rendering success) -->
+    <!-- ERP MODULE NAVIGATION TABS -->
+    <div class="erp-tabs-bar" id="erp-tabs-bar">
+      <button class="erp-tab active" data-tab="catalog">📦 Catálogo Tienda</button>
+      <button class="erp-tab" data-tab="sales">🧾 Ventas & Facturación</button>
+      <button class="erp-tab" data-tab="purchases">🛒 Compras & Egresos</button>
+      <button class="erp-tab" data-tab="checking">📑 Cuentas Corrientes</button>
+      <button class="erp-tab" data-tab="checks">🏦 Cartera de Cheques</button>
+      <button class="erp-tab" data-tab="finance">📊 Reporte Financiero & IVA</button>
+    </div>
+
+    <!-- ================= VIEW 1: CATALOG MANAGEMENT ================= -->
+    <div id="view-catalog" class="erp-view active">
+      <div class="admin-layout">
+        <section class="admin-card">
+          <h3 class="admin-card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm);">
+            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+              <span>Gestionar Catálogo Online</span>
+              <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;" id="admin-results-count">Cargando catálogo...</span>
+            </div>
+            <button id="open-modal-btn" class="admin-btn admin-btn-accent" style="padding: 8px var(--spacing-md); font-size: 0.8rem; border-radius: var(--radius-md);" type="button">
+              ➕ Cargar Producto Nuevo
+            </button>
+          </h3>
+          
+          <div class="admin-filters-container">
+            <input 
+              type="text" 
+              id="admin-search-filter" 
+              class="form-control admin-filter-control" 
+              placeholder="🔍 Buscar por nombre, marca o modelo..." 
+              style="flex: 2; min-width: 200px;"
+            >
+            <select 
+              id="admin-category-filter" 
+              class="form-control admin-filter-control" 
+              style="flex: 1; min-width: 150px;"
+            >
+              <option value="ALL">Todas las Categorías</option>
+              <option value="Faros y Ópticas">Faros y Ópticas</option>
+              <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
+              <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
+              <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
+              <option value="Tazas y Molduras">Tazas y Molduras</option>
+            </select>
+            <button 
+              id="admin-reset-filters" 
+              class="admin-btn admin-btn-danger admin-filter-control" 
+              style="border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 16px !important;"
+              title="Limpiar filtros"
+              type="button"
+            >
+              Restaurar
+            </button>
+          </div>
+
+          <div class="products-list-wrapper" id="admin-products-list"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 2: SALES & INVOICES ================= -->
+    <div id="view-sales" class="erp-view">
+      <div class="admin-layout" style="grid-template-columns: 1fr;">
+        <section class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div>
+              <h3 class="admin-card-title" style="margin-bottom: 4px;">🧾 Ventas y Comprobantes Emitidos</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Facturas A, B, C y Remitos/Presupuestos comerciales</p>
+            </div>
+            <button id="open-sale-modal-btn" class="admin-btn admin-btn-accent" style="padding: 10px 18px; font-weight: 700; border-radius: var(--radius-md);" type="button">
+              ➕ Emitir Comprobante
+            </button>
+          </div>
+
+          <!-- Sales Summary KPIs -->
+          <div class="finance-kpi-grid" style="margin-block-end: var(--spacing-md);">
+            <div class="finance-kpi-card accent">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Facturado</span>
+              <span id="sales-kpi-total" style="font-size: 1.4rem; font-weight: 800; color: var(--primary-navy);">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Comprobantes válidos</span>
+            </div>
+            <div class="finance-kpi-card warning">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">A Cobrar (Cta Cte)</span>
+              <span id="sales-kpi-pending" style="font-size: 1.4rem; font-weight: 800; color: #D97706;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Saldos impagos de clientes</span>
+            </div>
+            <div class="finance-kpi-card success">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Cobrado al Contado</span>
+              <span id="sales-kpi-collected" style="font-size: 1.4rem; font-weight: 800; color: #10B981;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Efectivo, Transf. y Cheques</span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="admin-filters-container">
+            <input type="text" id="sales-search-filter" class="form-control admin-filter-control" placeholder="🔍 Buscar por cliente, CUIT o N°..." style="flex: 2; min-width: 200px;">
+            <select id="sales-type-filter" class="form-control admin-filter-control" style="flex: 1; min-width: 150px;">
+              <option value="ALL">Todos los Tipos</option>
+              <option value="FACTURA_A">Factura A</option>
+              <option value="FACTURA_B">Factura B</option>
+              <option value="FACTURA_C">Factura C</option>
+              <option value="REMITO">Remito / Presupuesto</option>
+            </select>
+            <select id="sales-status-filter" class="form-control admin-filter-control" style="flex: 1; min-width: 150px;">
+              <option value="ALL">Todos los Estados</option>
+              <option value="paid">Totalmente Cobrado</option>
+              <option value="pending">Pendiente de Cobro</option>
+              <option value="partial">Cobro Parcial</option>
+            </select>
+          </div>
+
+          <!-- Sales Table -->
+          <div class="erp-table-wrapper">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo & N°</th>
+                  <th>Cliente</th>
+                  <th>Condición</th>
+                  <th style="text-align: right;">Total</th>
+                  <th style="text-align: right;">Saldo Pend.</th>
+                  <th style="text-align: center;">Estado</th>
+                  <th style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="sales-table-body">
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 24px;">No hay ventas registradas aún. Presioná "➕ Emitir Comprobante".</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 3: PURCHASES & EXPENSES ================= -->
+    <div id="view-purchases" class="erp-view">
+      <div class="admin-layout" style="grid-template-columns: 1fr;">
+        <section class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div>
+              <h3 class="admin-card-title" style="margin-bottom: 4px;">🛒 Compras a Proveedores & Egresos</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Facturas de compras de repuestos, gastos operativos e impuestos</p>
+            </div>
+            <button id="open-purchase-modal-btn" class="admin-btn admin-btn-accent" style="padding: 10px 18px; font-weight: 700; border-radius: var(--radius-md);" type="button">
+              ➕ Cargar Compra / Gasto
+            </button>
+          </div>
+
+          <!-- Purchases KPIs -->
+          <div class="finance-kpi-grid" style="margin-block-end: var(--spacing-md);">
+            <div class="finance-kpi-card danger">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Compras & Egresos</span>
+              <span id="purchases-kpi-total" style="font-size: 1.4rem; font-weight: 800; color: #DC2626;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Comprobantes cargados</span>
+            </div>
+            <div class="finance-kpi-card accent">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Crédito Fiscal IVA Total</span>
+              <span id="purchases-kpi-iva" style="font-size: 1.4rem; font-weight: 800; color: var(--primary-navy);">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">IVA 21% + 10.5% a favor</span>
+            </div>
+            <div class="finance-kpi-card warning">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">A Pagar (Cta Cte Proveedores)</span>
+              <span id="purchases-kpi-pending" style="font-size: 1.4rem; font-weight: 800; color: #D97706;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Deuda pendiente comercial</span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="admin-filters-container">
+            <input type="text" id="purchases-search-filter" class="form-control admin-filter-control" placeholder="🔍 Buscar por proveedor, concepto o N°..." style="flex: 2; min-width: 200px;">
+            <select id="purchases-type-filter" class="form-control admin-filter-control" style="flex: 1; min-width: 150px;">
+              <option value="ALL">Todos los Tipos</option>
+              <option value="FACTURA_PROVEEDOR">Facturas de Compra</option>
+              <option value="GASTO_OPERATIVO">Gastos Operativos</option>
+            </select>
+          </div>
+
+          <!-- Purchases Table -->
+          <div class="erp-table-wrapper">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo & N°</th>
+                  <th>Proveedor / Concepto</th>
+                  <th style="text-align: right;">Neto</th>
+                  <th style="text-align: right;">IVA Crédito</th>
+                  <th style="text-align: right;">Ret/Percep</th>
+                  <th style="text-align: right;">Total</th>
+                  <th>Medio Pago</th>
+                  <th style="text-align: center;">Estado</th>
+                  <th style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="purchases-table-body">
+                <tr>
+                  <td colspan="10" style="text-align: center; color: var(--text-secondary); padding: 24px;">No hay compras o gastos cargados. Presioná "➕ Cargar Compra / Gasto".</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 4: CHECKING ACCOUNTS (CUENTAS CORRIENTES) ================= -->
+    <div id="view-checking" class="erp-view">
+      <div class="admin-layout" style="grid-template-columns: 1fr;">
+        <section class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div>
+              <h3 class="admin-card-title" style="margin-bottom: 4px;">📑 Cuentas Corrientes & Cobranzas/Pagos</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Control de saldos a cobrar de clientes y deudas a pagar a proveedores</p>
+            </div>
+            <button id="open-payment-modal-btn" class="admin-btn admin-btn-accent" style="padding: 10px 18px; font-weight: 700; border-radius: var(--radius-md);" type="button">
+              ➕ Registrar Cobro / Pago
+            </button>
+          </div>
+
+          <!-- Subtabs for Clientes vs Proveedores -->
+          <div style="display: flex; gap: 8px; margin-block-end: var(--spacing-md); border-block-end: 2px solid var(--border-light); padding-block-end: 8px;">
+            <button type="button" id="cta-tab-clients" class="admin-btn admin-btn-primary" style="padding: 6px 16px; font-size: 0.85rem; border-radius: var(--radius-md);">
+              👤 Clientes (Saldos a Cobrar)
+            </button>
+            <button type="button" id="cta-tab-suppliers" class="admin-btn" style="background-color: var(--bg-surface-low); color: var(--text-primary); padding: 6px 16px; font-size: 0.85rem; border-radius: var(--radius-md);">
+              🏢 Proveedores (Saldos a Pagar)
+            </button>
+          </div>
+
+          <!-- Checking KPI Grid -->
+          <div class="finance-kpi-grid" style="margin-block-end: var(--spacing-md);">
+            <div class="finance-kpi-card warning">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Clientes a Cobrar</span>
+              <span id="checking-kpi-clients-pending" style="font-size: 1.4rem; font-weight: 800; color: #D97706;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Saldos en cta cte de clientes</span>
+            </div>
+            <div class="finance-kpi-card danger">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Proveedores a Pagar</span>
+              <span id="checking-kpi-suppliers-pending" style="font-size: 1.4rem; font-weight: 800; color: #DC2626;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Deudas comerciales pendientes</span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="admin-filters-container">
+            <input type="text" id="checking-search-filter" class="form-control admin-filter-control" placeholder="🔍 Buscar contacto o CUIT..." style="flex: 2; min-width: 200px;">
+          </div>
+
+          <!-- Checking Accounts Table -->
+          <div class="erp-table-wrapper">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Nombre / Razón Social</th>
+                  <th>CUIT / DNI</th>
+                  <th>Teléfono / Domicilio</th>
+                  <th style="text-align: right;">Total Facturado / Comprado</th>
+                  <th style="text-align: right;">Total Abonado</th>
+                  <th style="text-align: right;">Saldo Pendiente</th>
+                  <th style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="checking-table-body">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 24px;">No hay movimientos en cuentas corrientes aún.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 5: CHECKS PORTFOLIO (CARTERA DE CHEQUES) ================= -->
+    <div id="view-checks" class="erp-view">
+      <div class="admin-layout" style="grid-template-columns: 1fr;">
+        <section class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div>
+              <h3 class="admin-card-title" style="margin-bottom: 4px;">🏦 Cartera de Cheques Recibidos</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Trazabilidad completa: en cartera, cobrados, endosados a proveedores o rechazados</p>
+            </div>
+          </div>
+
+          <!-- Checks KPIs -->
+          <div class="finance-kpi-grid" style="margin-block-end: var(--spacing-md);">
+            <div class="finance-kpi-card accent">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Cheques en Cartera (Disponibles)</span>
+              <span id="checks-kpi-available" style="font-size: 1.4rem; font-weight: 800; color: var(--primary-navy);">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Listos para depositar o endosar</span>
+            </div>
+            <div class="finance-kpi-card success">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Cheques Cobrados / Depositados</span>
+              <span id="checks-kpi-collected" style="font-size: 1.4rem; font-weight: 800; color: #10B981;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Acreditados en cuenta bancaria</span>
+            </div>
+            <div class="finance-kpi-card info">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Endosados a Proveedores</span>
+              <span id="checks-kpi-endorsed" style="font-size: 1.4rem; font-weight: 800; color: #0284C7;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Entregados como medio de pago</span>
+            </div>
+            <div class="finance-kpi-card danger">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Cheques Rechazados</span>
+              <span id="checks-kpi-rejected" style="font-size: 1.4rem; font-weight: 800; color: #DC2626;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Sin fondos o problemas de firma</span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="admin-filters-container">
+            <input type="text" id="checks-search-filter" class="form-control admin-filter-control" placeholder="🔍 Buscar por N° cheque, banco o librador..." style="flex: 2; min-width: 200px;">
+            <select id="checks-status-filter" class="form-control admin-filter-control" style="flex: 1; min-width: 150px;">
+              <option value="ALL">Todos los Estados</option>
+              <option value="IN_PORTFOLIO">En Cartera (Disponible)</option>
+              <option value="DEPOSITED">Depositado / Cobrado</option>
+              <option value="ENDORSED">Endosado a Proveedor</option>
+              <option value="REJECTED">Rechazado</option>
+            </select>
+          </div>
+
+          <!-- Checks Table -->
+          <div class="erp-table-wrapper">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>N° Cheque</th>
+                  <th>Banco</th>
+                  <th>Vencimiento</th>
+                  <th>Cliente que lo Entregó</th>
+                  <th>Titular / Librador</th>
+                  <th style="text-align: right;">Importe</th>
+                  <th style="text-align: center;">Estado</th>
+                  <th style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="checks-table-body">
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 24px;">No hay cheques registrados en cartera.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 6: FINANCIAL REPORT & TAXES (IVA / RETENCIONES) ================= -->
+    <div id="view-finance" class="erp-view">
+      <div class="admin-layout" style="grid-template-columns: 1fr;">
+        <section class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div>
+              <h3 class="admin-card-title" style="margin-bottom: 4px;">📊 Resumen Financiero, Libro IVA & Retenciones</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Análisis impositivo fiscal y balances comerciales por período configurable</p>
+            </div>
+            
+            <!-- Date Filter Controls -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <select id="finance-period-preset" class="form-control" style="width: auto; padding: 6px 12px; font-weight: 600;">
+                <option value="CURRENT_MONTH">Mes Actual</option>
+                <option value="PREVIOUS_MONTH">Mes Anterior</option>
+                <option value="CURRENT_YEAR">Año Actual</option>
+                <option value="CUSTOM">Personalizado (Desde / Hasta)</option>
+                <option value="ALL">Todo el Historial</option>
+              </select>
+              <div id="finance-date-inputs" style="display: none; gap: 6px; align-items: center;">
+                <input type="date" id="finance-date-start" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.8rem;">
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">a</span>
+                <input type="date" id="finance-date-end" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.8rem;">
+              </div>
+              <button type="button" id="finance-filter-btn" class="admin-btn admin-btn-accent" style="padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-md);">
+                Actualizar Reporte
+              </button>
+            </div>
+          </div>
+
+          <!-- Overall Financial KPIs -->
+          <div class="finance-kpi-grid">
+            <div class="finance-kpi-card accent">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Facturado Ventas</span>
+              <span id="fin-kpi-sales" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-navy);">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);" id="fin-kpi-sales-sub">0 facturas emitidas</span>
+            </div>
+            <div class="finance-kpi-card danger">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Compras & Egresos</span>
+              <span id="fin-kpi-purchases" style="font-size: 1.5rem; font-weight: 800; color: #DC2626;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);" id="fin-kpi-purchases-sub">0 comprobantes cargados</span>
+            </div>
+            <div class="finance-kpi-card success" id="fin-kpi-card-tax">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Posición IVA del Período</span>
+              <span id="fin-kpi-tax-balance" style="font-size: 1.5rem; font-weight: 800; color: #10B981;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);" id="fin-kpi-tax-status">Débito Fiscal vs Crédito Fiscal</span>
+            </div>
+            <div class="finance-kpi-card info">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Flujo de Caja Real Cobrado</span>
+              <span id="fin-kpi-cashflow" style="font-size: 1.5rem; font-weight: 800; color: #0284C7;">$0.00</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Efectivo y transferencias percibidas</span>
+            </div>
+          </div>
+
+          <!-- Tax Breakdown Comparison Grids -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--spacing-lg); margin-block-start: var(--spacing-md);">
+            
+            <!-- Ventas Tax Breakdown -->
+            <div style="background-color: var(--bg-surface-low); padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+              <h4 style="color: var(--primary-navy); margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>📈 Débito Fiscal e Ingresos (Ventas)</span>
+              </h4>
+              <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                <tbody>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Subtotal Neto Gravado (21%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;" id="fin-sales-neto-21">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">IVA Débito Fiscal (21%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #DC2626;" id="fin-sales-iva-21">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Subtotal Neto Gravado (10.5%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;" id="fin-sales-neto-105">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">IVA Débito Fiscal (10.5%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #DC2626;" id="fin-sales-iva-105">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Percepciones de IIBB e IVA emitidas:</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: var(--primary-navy);" id="fin-sales-perc">$0.00</td>
+                  </tr>
+                  <tr style="font-weight: 700; background-color: rgba(11, 37, 69, 0.05);">
+                    <td style="padding: 10px 4px; color: var(--primary-navy);">TOTAL IVA DÉBITO FISCAL:</td>
+                    <td style="padding: 10px 4px; text-align: right; color: #DC2626; font-size: 1rem;" id="fin-sales-iva-total">$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Compras Tax Breakdown -->
+            <div style="background-color: var(--bg-surface-low); padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+              <h4 style="color: var(--primary-navy); margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>📉 Crédito Fiscal & Gastos (Compras)</span>
+              </h4>
+              <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                <tbody>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Subtotal Neto Gravado (21%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;" id="fin-purchases-neto-21">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">IVA Crédito Fiscal (21%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #10B981;" id="fin-purchases-iva-21">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Subtotal Neto Gravado (10.5%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;" id="fin-purchases-neto-105">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">IVA Crédito Fiscal (10.5%):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #10B981;" id="fin-purchases-iva-105">$0.00</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 8px 0; color: var(--text-secondary);">Percepciones Sufridas (IIBB / IVA):</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600; color: var(--primary-navy);" id="fin-purchases-perc">$0.00</td>
+                  </tr>
+                  <tr style="font-weight: 700; background-color: rgba(11, 37, 69, 0.05);">
+                    <td style="padding: 10px 4px; color: var(--primary-navy);">TOTAL IVA CRÉDITO FISCAL:</td>
+                    <td style="padding: 10px 4px; text-align: right; color: #10B981; font-size: 1rem;" id="fin-purchases-iva-total">$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- Position Calculation Banner -->
+          <div style="margin-block-start: var(--spacing-lg); padding: var(--spacing-md); border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy)); color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-size: 1.1rem;">⚖️ Resultado Técnico IVA del Período</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: rgba(255, 255, 255, 0.8);">Cálculo directo: Total Débito Fiscal Ventas − Total Crédito Fiscal Compras</p>
+            </div>
+            <div style="text-align: right;">
+              <span id="fin-tax-net-result" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-yellow);">$0.00</span>
+              <div id="fin-tax-net-label" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Saldo Técnico Neutro</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================= MODALS SECTION ================= -->
+
+    <!-- MODAL 1: PRODUCT ADD / EDIT (EXISTING) -->
     <dialog id="product-modal">
       <section class="admin-card" style="position: relative;">
         <button type="button" class="close-modal-btn" id="close-modal-x" title="Cerrar ventana">
@@ -640,8 +1411,6 @@
           <span id="form-action-title">Cargar Producto Nuevo</span>
           <button id="cancel-edit-btn" class="admin-btn-danger" style="display: none; padding: 4px 8px; font-size: 0.7rem; border-radius: var(--radius-sm);">Cancelar</button>
         </h3>
-        
-
 
         <form id="product-form" class="admin-form">
           <input type="hidden" id="edit-product-id">
@@ -708,11 +1477,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
               </svg>
               <span id="upload-status" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Elegir foto o sacar foto con la cámara</span>
-              <!-- Native accept for camera trigger on mobile -->
               <input type="file" id="prod-image-file" accept="image/*">
               <img id="image-preview" class="upload-preview" alt="Vista previa de foto">
             </div>
-            <!-- String fallback in case edit preserves old image -->
             <input type="hidden" id="prod-image-url">
           </div>
 
@@ -723,65 +1490,442 @@
       </section>
     </dialog>
 
-    <!-- Main Layout -->
-    <div class="admin-layout">
-      
-      <!-- RIGHT COLUMN: PRODUCTS LIST -->
-      <section class="admin-card">
-        <h3 class="admin-card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm);">
-          <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-            <span>Gestionar Catálogo</span>
-            <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;" id="admin-results-count">Cargando catálogo...</span>
-          </div>
-          <button id="open-modal-btn" class="admin-btn admin-btn-accent" style="padding: 8px var(--spacing-md); font-size: 0.8rem; border-radius: var(--radius-md);" type="button">
-            ➕ Cargar Producto Nuevo
-          </button>
+    <!-- MODAL 2: SALE & INVOICE EMISSION -->
+    <dialog id="sale-modal" class="erp-modal">
+      <section class="admin-card" style="position: relative; margin: 0; max-height: 90vh; overflow-y: auto;">
+        <button type="button" class="close-modal-btn" id="close-sale-modal-x" title="Cerrar ventana">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="inline-size: 20px; block-size: 20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h3 class="admin-card-title" style="padding-inline-end: 24px;">
+          <span>🧾 Emitir Comprobante (Factura o Remito)</span>
         </h3>
-        
-        <!-- Admin Filters Row -->
-        <div class="admin-filters-container">
-          <input 
-            type="text" 
-            id="admin-search-filter" 
-            class="form-control admin-filter-control" 
-            placeholder="🔍 Buscar por nombre, marca o modelo..." 
-            style="flex: 2; min-width: 200px;"
-          >
-          <select 
-            id="admin-category-filter" 
-            class="form-control admin-filter-control" 
-            style="flex: 1; min-width: 150px;"
-          >
-            <option value="ALL">Todas las Categorías</option>
-            <option value="Faros y Ópticas">Faros y Ópticas</option>
-            <option value="Espejos y Levantacristales">Espejos y Levantacristales</option>
-            <option value="Manijas y Cerraduras">Manijas y Cerraduras</option>
-            <option value="Volantes Deportivos y Accesorios">Volantes Deportivos y Accesorios</option>
-            <option value="Tazas y Molduras">Tazas y Molduras</option>
-          </select>
-          <button 
-            id="admin-reset-filters" 
-            class="admin-btn admin-btn-danger admin-filter-control" 
-            style="border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 16px !important;"
-            title="Limpiar filtros"
-            type="button"
-          >
-            Restaurar
+
+        <form id="sale-form" class="admin-form">
+          
+          <!-- Comprobante Meta Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sale-type" class="form-label">Tipo de Comprobante</label>
+              <select id="sale-type" class="form-control" required>
+                <option value="FACTURA_B">Factura B (Consumidor Final / Monotributo)</option>
+                <option value="FACTURA_A">Factura A (Responsable Inscripto)</option>
+                <option value="FACTURA_C">Factura C</option>
+                <option value="REMITO">Remito / Presupuesto Comercial</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sale-number" class="form-label">Número de Comprobante</label>
+              <input type="text" id="sale-number" class="form-control" placeholder="0001-00000001" required>
+            </div>
+            <div class="form-group">
+              <label for="sale-date" class="form-label">Fecha de Emisión</label>
+              <input type="date" id="sale-date" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Customer Data Row -->
+          <div style="background-color: var(--bg-surface-low); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-block-end: var(--spacing-sm);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-navy); display: block; margin-block-end: 6px;">Datos del Cliente</span>
+            <div class="form-row">
+              <div class="form-group" style="flex: 2;">
+                <label for="sale-client-name" class="form-label">Nombre / Razón Social</label>
+                <input type="text" id="sale-client-name" class="form-control" placeholder="Ej. Transporte San Martín SRL o Juan Pérez" required>
+              </div>
+              <div class="form-group">
+                <label for="sale-client-cuit" class="form-label">CUIT / DNI</label>
+                <input type="text" id="sale-client-cuit" class="form-control" placeholder="30-71234567-9 o 35123456">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sale-client-iva" class="form-label">Condición IVA</label>
+                <select id="sale-client-iva" class="form-control">
+                  <option value="Consumidor Final">Consumidor Final</option>
+                  <option value="Responsable Inscripto">IVA Responsable Inscripto</option>
+                  <option value="Responsable Monotributo">Responsable Monotributo</option>
+                  <option value="Exento">IVA Exento</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 2;">
+                <label for="sale-client-address" class="form-label">Domicilio Comercial</label>
+                <input type="text" id="sale-client-address" class="form-control" placeholder="Ej. Av. Mitre 1234, Wilde, Bs. As.">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sale Condition -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sale-payment-term" class="form-label">Condición de Venta / Pago</label>
+              <select id="sale-payment-term" class="form-control" required>
+                <option value="CONTADO_EFECTIVO">Contado - Efectivo</option>
+                <option value="CONTADO_TRANSFERENCIA">Contado - Transferencia Bancaria</option>
+                <option value="CONTADO_CHEQUE">Contado - Cheque de Tercero (Ingreso a Cartera)</option>
+                <option value="CTA_CTE">Cuenta Corriente (A cobrar)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Check Input Fields (Shown only if CONTADO_CHEQUE selected) -->
+          <div id="sale-check-fields" style="display: none; background-color: #FEF3C7; padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid #F59E0B; margin-block-end: var(--spacing-sm);">
+            <h4 style="color: #92400E; margin-top: 0; margin-bottom: 8px; font-size: 0.9rem;">🏦 Datos del Cheque a Ingresar a Cartera</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sale-check-bank" class="form-label">Banco Emisor</label>
+                <input type="text" id="sale-check-bank" class="form-control" placeholder="Ej. Banco Galicia">
+              </div>
+              <div class="form-group">
+                <label for="sale-check-number" class="form-label">N° de Cheque</label>
+                <input type="text" id="sale-check-number" class="form-control" placeholder="Ej. 84920194">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sale-check-due" class="form-label">Fecha de Cobro / Vencimiento</label>
+                <input type="date" id="sale-check-due" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="sale-check-drawer" class="form-label">Titular / Librador</label>
+                <input type="text" id="sale-check-drawer" class="form-control" placeholder="Ej. Juan Gómez (CUIT 20...)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Line Items Container -->
+          <div style="margin-block-start: var(--spacing-sm); margin-block-end: var(--spacing-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-block-end: 8px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-navy);">Detalle de Artículos / Repuestos</span>
+              <button type="button" id="sale-add-item-btn" class="admin-btn admin-btn-accent" style="padding: 4px 10px; font-size: 0.75rem; border-radius: var(--radius-sm);">
+                ➕ Agregar Ítem
+              </button>
+            </div>
+
+            <div id="sale-items-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic rows rendered here -->
+            </div>
+          </div>
+
+          <!-- Tax Perceptions & Retentions -->
+          <div style="background-color: var(--bg-surface-low); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-block-end: var(--spacing-sm);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-navy); display: block; margin-block-end: 6px;">Percepciones Aplicadas (Opcional)</span>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sale-perc-iibb" class="form-label">Percepción IIBB ($)</label>
+                <input type="number" id="sale-perc-iibb" class="form-control" value="0" step="0.01" min="0">
+              </div>
+              <div class="form-group">
+                <label for="sale-perc-iva" class="form-label">Percepción IVA ($)</label>
+                <input type="number" id="sale-perc-iva" class="form-control" value="0" step="0.01" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Totals Summary Card -->
+          <div style="background-color: #F8FAFC; border: 2px solid var(--border-light); border-radius: var(--radius-md); padding: var(--spacing-md); margin-block-end: var(--spacing-md);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span style="color: var(--text-secondary);">Subtotal Neto Gravado:</span>
+              <strong id="sale-total-neto">$0.00</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span style="color: var(--text-secondary);">IVA 21%:</span>
+              <span id="sale-total-iva-21">$0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span style="color: var(--text-secondary);">IVA 10.5%:</span>
+              <span id="sale-total-iva-105">$0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+              <span style="color: var(--text-secondary);">Percepciones:</span>
+              <span id="sale-total-perc">$0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; border-top: 2px solid var(--border-light); padding-top: 8px; margin-top: 4px; color: var(--primary-navy);">
+              <span>TOTAL COMPROBANTE:</span>
+              <span id="sale-total-final">$0.00</span>
+            </div>
+          </div>
+
+          <button type="submit" class="admin-btn admin-btn-accent" id="save-sale-btn" style="width: 100%; padding: 12px; font-weight: 700;">
+            <span>Emitir y Registrar Comprobante</span>
           </button>
+        </form>
+      </section>
+    </dialog>
+
+    <!-- MODAL 3: PURCHASE & EXPENSE REGISTRATION -->
+    <dialog id="purchase-modal" class="erp-modal">
+      <section class="admin-card" style="position: relative; margin: 0; max-height: 90vh; overflow-y: auto;">
+        <button type="button" class="close-modal-btn" id="close-purchase-modal-x" title="Cerrar ventana">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="inline-size: 20px; block-size: 20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h3 class="admin-card-title" style="padding-inline-end: 24px;">
+          <span>🛒 Cargar Factura de Compra / Gasto Operativo</span>
+        </h3>
+
+        <form id="purchase-form" class="admin-form">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="purchase-type" class="form-label">Tipo de Comprobante</label>
+              <select id="purchase-type" class="form-control" required>
+                <option value="FACTURA_A">Factura A Proveedor (Discrimina IVA Crédito)</option>
+                <option value="FACTURA_B">Factura B Proveedor</option>
+                <option value="FACTURA_C">Factura C Proveedor</option>
+                <option value="GASTO_OPERATIVO">Gasto Operativo / Ticket / Servicio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="purchase-number" class="form-label">N° Factura / Recibo</label>
+              <input type="text" id="purchase-number" class="form-control" placeholder="Ej. 0002-00045120" required>
+            </div>
+            <div class="form-group">
+              <label for="purchase-date" class="form-label">Fecha de Compra</label>
+              <input type="date" id="purchase-date" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label for="purchase-supplier-name" class="form-label">Proveedor / Acreedor</label>
+              <input type="text" id="purchase-supplier-name" class="form-control" placeholder="Ej. Distribuidora Autopartes Norte SA" required>
+            </div>
+            <div class="form-group">
+              <label for="purchase-supplier-cuit" class="form-label">CUIT Proveedor</label>
+              <input type="text" id="purchase-supplier-cuit" class="form-control" placeholder="30-68912345-4">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="purchase-category" class="form-label">Rubro / Concepto</label>
+            <select id="purchase-category" class="form-control" required>
+              <option value="Mercadería / Repuestos">Mercadería / Repuestos para reventa</option>
+              <option value="Fletes y Envíos">Fletes y Envíos</option>
+              <option value="Servicios Públicos (Luz/Internet)">Servicios Públicos (Luz / Internet / Teléfono)</option>
+              <option value="Alquiler">Alquiler de Local / Depósito</option>
+              <option value="Sueldos / Comisiones">Sueldos / Comisiones</option>
+              <option value="Impuestos / Tasas">Impuestos / Tasas Municipales</option>
+              <option value="Otros Gastos Operativos">Otros Gastos Operativos</option>
+            </select>
+          </div>
+
+          <!-- Reposition Stock into Catalog (Optional) -->
+          <div style="background-color: #ECFDF5; padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); border: 1px solid #10B981; margin-block-end: var(--spacing-sm);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #065F46; display: block; margin-block-end: 6px;">📦 Reponer Stock al Catálogo (Opcional)</span>
+            <div class="form-row">
+              <div class="form-group" style="flex: 2;">
+                <label for="purchase-stock-product" class="form-label">Repuesto a Aumentar Stock</label>
+                <select id="purchase-stock-product" class="form-control">
+                  <option value="">-- Ninguno (No modificar stock) --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="purchase-stock-qty" class="form-label">Cant. a Sumar</label>
+                <input type="number" id="purchase-stock-qty" class="form-control" min="0" value="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tax Breakdown -->
+          <div style="background-color: var(--bg-surface-low); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-block-end: var(--spacing-sm);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-navy); display: block; margin-block-end: 6px;">Desglose Fiscal (IVA & Percepciones)</span>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="purchase-neto-21" class="form-label">Neto Gravado 21% ($)</label>
+                <input type="number" id="purchase-neto-21" class="form-control" value="0" step="0.01" min="0">
+              </div>
+              <div class="form-group">
+                <label for="purchase-iva-21" class="form-label">IVA Crédito 21% ($)</label>
+                <input type="number" id="purchase-iva-21" class="form-control" value="0" step="0.01" min="0">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="purchase-neto-105" class="form-label">Neto Gravado 10.5% ($)</label>
+                <input type="number" id="purchase-neto-105" class="form-control" value="0" step="0.01" min="0">
+              </div>
+              <div class="form-group">
+                <label for="purchase-iva-105" class="form-label">IVA Crédito 10.5% ($)</label>
+                <input type="number" id="purchase-iva-105" class="form-control" value="0" step="0.01" min="0">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="purchase-perc" class="form-label">Percepciones Sufridas (IIBB / IVA) ($)</label>
+                <input type="number" id="purchase-perc" class="form-control" value="0" step="0.01" min="0">
+              </div>
+              <div class="form-group">
+                <label for="purchase-exempt" class="form-label">No Gravado / Exento ($)</label>
+                <input type="number" id="purchase-exempt" class="form-control" value="0" step="0.01" min="0">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 8px; margin-top: 6px;">
+              <span style="font-weight: 700; color: var(--primary-navy);">TOTAL FACTURA / GASTO:</span>
+              <strong id="purchase-total-final" style="font-size: 1.25rem; color: #DC2626;">$0.00</strong>
+            </div>
+          </div>
+
+          <!-- Payment Condition -->
+          <div class="form-group">
+            <label for="purchase-payment-method" class="form-label">Condición / Medio de Pago</label>
+            <select id="purchase-payment-method" class="form-control" required>
+              <option value="CONTADO_EFECTIVO">Contado - Efectivo</option>
+              <option value="CONTADO_TRANSFERENCIA">Contado - Transferencia Bancaria</option>
+              <option value="CHEQUE_CARTERA">Pagar con Cheque de Cartera (Endoso a Proveedor)</option>
+              <option value="CTA_CTE">Cuenta Corriente Proveedor (Saldo a Pagar)</option>
+            </select>
+          </div>
+
+          <!-- Selector of Portfolio Check for Endorsement -->
+          <div id="purchase-check-container" style="display: none; background-color: #E0F2FE; padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid #0284C7; margin-block-end: var(--spacing-sm);">
+            <label for="purchase-check-select" class="form-label" style="color: #0369A1; font-weight: 700;">Seleccionar Cheque de la Cartera para Entregar</label>
+            <select id="purchase-check-select" class="form-control">
+              <option value="">-- Seleccionar cheque disponible --</option>
+            </select>
+            <p style="font-size: 0.75rem; color: #0284C7; margin-top: 4px; margin-bottom: 0;">El cheque pasará automáticamente al estado "Endosado a Proveedor".</p>
+          </div>
+
+          <button type="submit" class="admin-btn admin-btn-accent" id="save-purchase-btn" style="width: 100%; padding: 12px; font-weight: 700;">
+            <span>Registrar Compra / Gasto</span>
+          </button>
+        </form>
+      </section>
+    </dialog>
+
+    <!-- MODAL 4: PAYMENT / COLLECTION IMPUTATION -->
+    <dialog id="payment-modal" class="erp-modal">
+      <section class="admin-card" style="position: relative; margin: 0; max-height: 90vh; overflow-y: auto;">
+        <button type="button" class="close-modal-btn" id="close-payment-modal-x" title="Cerrar ventana">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="inline-size: 20px; block-size: 20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h3 class="admin-card-title" style="padding-inline-end: 24px;">
+          <span>💵 Registrar Cobranza o Pago en Cta Cte</span>
+        </h3>
+
+        <form id="payment-form" class="admin-form">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payment-direction" class="form-label">Tipo de Movimiento</label>
+              <select id="payment-direction" class="form-control" required>
+                <option value="CLIENT_COLLECTION">Cobranza a Cliente (Ingreso de fondos)</option>
+                <option value="SUPPLIER_PAYMENT">Pago a Proveedor (Egreso de fondos)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label for="payment-contact-select" class="form-label">Seleccionar Contacto</label>
+              <select id="payment-contact-select" class="form-control" required>
+                <option value="">-- Seleccionar --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payment-date" class="form-label">Fecha del Pago</label>
+              <input type="date" id="payment-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="payment-method" class="form-label">Medio de Pago</label>
+              <select id="payment-method" class="form-control" required>
+                <option value="EFECTIVO">Efectivo</option>
+                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                <option value="CHEQUE_TERCERO">Cheque de Tercero (Cliente)</option>
+                <option value="CHEQUE_CARTERA">Cheque de Cartera (Endoso a Proveedor)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Cheque de Tercero Fields -->
+          <div id="payment-check-third-fields" style="display: none; background-color: #FEF3C7; padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid #F59E0B; margin-block-end: var(--spacing-sm);">
+            <h4 style="color: #92400E; margin-top: 0; margin-bottom: 8px; font-size: 0.9rem;">🏦 Datos del Cheque a Ingresar</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="payment-check-bank" class="form-label">Banco</label>
+                <input type="text" id="payment-check-bank" class="form-control" placeholder="Banco Santander">
+              </div>
+              <div class="form-group">
+                <label for="payment-check-number" class="form-label">N° de Cheque</label>
+                <input type="text" id="payment-check-number" class="form-control" placeholder="92837194">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="payment-check-due" class="form-label">Fecha Cobro / Vencimiento</label>
+                <input type="date" id="payment-check-due" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="payment-check-drawer" class="form-label">Titular / Librador</label>
+                <input type="text" id="payment-check-drawer" class="form-control" placeholder="Nombre y CUIT">
+              </div>
+            </div>
+          </div>
+
+          <!-- Cheque de Cartera for Supplier -->
+          <div id="payment-check-cartera-fields" style="display: none; background-color: #E0F2FE; padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid #0284C7; margin-block-end: var(--spacing-sm);">
+            <label for="payment-portfolio-check-select" class="form-label" style="color: #0369A1; font-weight: 700;">Seleccionar Cheque de Cartera para Entregar</label>
+            <select id="payment-portfolio-check-select" class="form-control">
+              <option value="">-- Seleccionar cheque disponible --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="payment-amount" class="form-label">Monto Total a Imputar ($)</label>
+            <input type="number" id="payment-amount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required style="font-size: 1.1rem; font-weight: 700;">
+          </div>
+
+          <!-- Outstanding Invoices List for Imputation -->
+          <div style="margin-block-start: var(--spacing-sm); margin-block-end: var(--spacing-sm);">
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-navy); display: block; margin-block-end: 6px;">
+              Comprobantes Pendientes para Cancelar / Imputar:
+            </span>
+            <div id="payment-invoices-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 8px; background: white;">
+              <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin: 12px 0;">Selecciona un contacto con comprobantes pendientes.</p>
+            </div>
+          </div>
+
+          <button type="submit" class="admin-btn admin-btn-accent" id="save-payment-btn" style="width: 100%; padding: 12px; font-weight: 700;">
+            <span>Registrar e Imputar Pago</span>
+          </button>
+        </form>
+      </section>
+    </dialog>
+
+    <!-- MODAL 5: PRINT VOUCHER MODAL -->
+    <dialog id="print-modal" class="erp-modal">
+      <section class="admin-card" style="position: relative; margin: 0; max-height: 95vh; overflow-y: auto; padding: var(--spacing-lg);">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-block-end: var(--spacing-md); border-block-end: 1px solid var(--border-light); padding-block-end: var(--spacing-sm);">
+          <span style="font-weight: 700; color: var(--primary-navy); font-size: 1.1rem;">Vista Previa de Comprobante</span>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="trigger-print-btn" class="admin-btn admin-btn-primary" style="padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-md);">
+              🖨️ Imprimir / PDF
+            </button>
+            <button type="button" id="close-print-modal-x" class="admin-btn" style="background-color: var(--bg-surface-low); color: var(--text-primary); padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-md);">
+              Cerrar
+            </button>
+          </div>
         </div>
 
-        <div class="products-list-wrapper" id="admin-products-list">
-          <!-- Rendered dynamically by admin.js -->
+        <div id="print-voucher-content" class="print-voucher">
+          <!-- Populated dynamically by control.js -->
         </div>
       </section>
+    </dialog>
 
-    </div>
   </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
   <!-- Firebase Connection via script modules -->
-  <script type="module" src="control.js?v=12"></script>
+  <script type="module" src="control.js?v=13"></script>
 </body>
 </html>

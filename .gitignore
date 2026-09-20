@@ -20,3 +20,9 @@ firebase-debug.log
 node_modules/
 package-lock.json
 npm-debug.log*
+
+# Local data files
+archivos/
+*.xls
+*.xlsx
+
