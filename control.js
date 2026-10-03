@@ -14,8 +14,29 @@ import {
   deleteDoc, 
   updateDoc, 
   onSnapshot, 
-  writeBatch 
+  writeBatch,
+  increment,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  round2,
+  escapeHtml,
+  normalizeName,
+  localDateISO,
+  periodRange,
+  computeSaleTotals,
+  computePurchaseTotals,
+  purchaseVatMismatch,
+  nextInvoiceNumber,
+  isDuplicateInvoiceNumber,
+  findStockShortages,
+  distributePayment,
+  applyPayment,
+  validateImputation,
+  groupAccountBalances,
+  computeFinancialReport
+} from "./erp-logic.mjs?v=1";
+
 
 // --- FIREBASE WEB SDK INITIALIZATION ---
 const firebaseConfig = {
@@ -451,10 +472,10 @@ function renderAdminProducts(productsArray) {
     const card = document.createElement("div");
     card.className = "manage-item-card";
     card.innerHTML = `
-      <img src="${prod.image_url}" alt="${prod.name}" class="manage-item-img">
+      <img src="${escapeHtml(prod.image_url)}" alt="${escapeHtml(prod.name)}" class="manage-item-img">
       <div class="manage-item-info">
-        <span class="manage-item-title">${prod.name}</span>
-        <span class="manage-item-meta">${prod.category} | ${prod.brand} ${prod.model} (${prod.year_start}-${prod.year_end})</span>
+        <span class="manage-item-title">${escapeHtml(prod.name)}</span>
+        <span class="manage-item-meta">${escapeHtml(prod.category)} | ${escapeHtml(prod.brand)} ${escapeHtml(prod.model)} (${escapeHtml(prod.year_start)}-${escapeHtml(prod.year_end)})</span>
       </div>
       <div class="manage-item-inputs">
         <div class="inline-input-group">
@@ -759,7 +780,7 @@ function showToast(message, type = "success") {
 
   toast.innerHTML = `
     ${icon}
-    <span>${message}</span>
+    <span>${escapeHtml(message)}</span>
   `;
 
   container.appendChild(toast);
@@ -948,6 +969,15 @@ function initSalesModule() {
   if (percIIBB) percIIBB.addEventListener("input", recalculateSaleTotals);
   if (percIVA) percIVA.addEventListener("input", recalculateSaleTotals);
 
+  // El tipo de comprobante cambia el IVA (Remito/Factura C no lo discriminan) y la numeración.
+  const saleTypeSelect = document.getElementById("sale-type");
+  if (saleTypeSelect) {
+    saleTypeSelect.addEventListener("change", () => {
+      document.getElementById("sale-number").value = nextInvoiceNumber(allInvoices, saleTypeSelect.value);
+      recalculateSaleTotals();
+    });
+  }
+
   if (saleForm) {
     saleForm.addEventListener("submit", handleSaveSale);
   }
@@ -963,11 +993,10 @@ function openSaleModal() {
 
   form.reset();
   checkFields.style.display = "none";
-  dateInput.value = new Date().toISOString().split("T")[0];
+  dateInput.value = localDateISO();
 
-  // Auto-generate invoice number (e.g. 0001-00000023)
-  const salesCount = allInvoices.filter(i => i.type === "sale").length + 1;
-  numberInput.value = `0001-${String(salesCount).padStart(8, "0")}`;
+  // Número correlativo por tipo de comprobante (ej. 0001-00000023)
+  numberInput.value = nextInvoiceNumber(allInvoices, document.getElementById("sale-type").value);
 
   // Clear and add 1 default item row
   itemsList.innerHTML = "";
@@ -983,18 +1012,19 @@ function addSaleItemRow(item = {}) {
   row.className = "sale-item-row";
   row.style.cssText = "display: flex; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-light); flex-wrap: wrap;";
 
-  // Build product options from allProducts
+  // Build product options from allProducts (datos escapados: vienen de la base de datos)
   let productOptionsHtml = `<option value="">-- Repuesto Manual / Detalle Libre --</option>`;
   allProducts.forEach(prod => {
-    productOptionsHtml += `<option value="${prod.id}" data-price="${prod.price}" data-name="${prod.name}" data-stock="${prod.stock}">${prod.name} (Stk: ${prod.stock}) - $${prod.price}</option>`;
+    productOptionsHtml += `<option value="${escapeHtml(prod.id)}" data-price="${escapeHtml(prod.price)}" data-name="${escapeHtml(prod.name)}" data-stock="${escapeHtml(prod.stock)}">${escapeHtml(prod.name)} (Stk: ${escapeHtml(prod.stock)}) - $${escapeHtml(prod.price)}</option>`;
   });
+
 
   row.innerHTML = `
     <div style="flex: 2; min-width: 180px;">
       <select class="form-control item-product-select" style="font-size: 0.8rem; margin-bottom: 4px;">
         ${productOptionsHtml}
       </select>
-      <input type="text" class="form-control item-desc" placeholder="Descripción del repuesto" value="${item.name || ''}" required style="font-size: 0.8rem;">
+      <input type="text" class="form-control item-desc" placeholder="Descripción del repuesto" value="${escapeHtml(item.name || '')}" required style="font-size: 0.8rem;">
     </div>
     <div style="width: 70px;">
       <label style="font-size: 0.65rem; color: var(--text-secondary); display: block;">Cant.</label>
@@ -1055,45 +1085,39 @@ function addSaleItemRow(item = {}) {
   recalculateSaleTotals();
 }
 
-function recalculateSaleTotals() {
+function readSaleItems() {
   const rows = document.querySelectorAll("#sale-items-list .sale-item-row");
-  let totalNeto = 0;
-  let neto21 = 0;
-  let neto105 = 0;
-  let iva21 = 0;
-  let iva105 = 0;
+  return Array.from(rows).map(row => ({
+    productId: row.querySelector(".item-product-select").value || null,
+    name: row.querySelector(".item-desc").value.trim(),
+    qty: Math.max(1, parseInt(row.querySelector(".item-qty").value, 10) || 1),
+    price: Math.max(0, parseFloat(row.querySelector(".item-price").value) || 0),
+    vatRate: parseFloat(row.querySelector(".item-vat").value) || 0,
+    _row: row
+  }));
+}
 
-  rows.forEach(row => {
-    const qty = parseFloat(row.querySelector(".item-qty").value) || 0;
-    const price = parseFloat(row.querySelector(".item-price").value) || 0;
-    const vatRate = parseFloat(row.querySelector(".item-vat").value) || 0;
-    const subtotal = qty * price;
-
-    totalNeto += subtotal;
-    if (vatRate === 21) {
-      neto21 += subtotal;
-      iva21 += subtotal * 0.21;
-    } else if (vatRate === 10.5) {
-      neto105 += subtotal;
-      iva105 += subtotal * 0.105;
-    }
-
-    const subtotalSpan = row.querySelector(".item-subtotal");
-    if (subtotalSpan) subtotalSpan.textContent = formatCurrency(subtotal);
+function recalculateSaleTotals() {
+  const invoiceType = document.getElementById("sale-type")?.value || "FACTURA_B";
+  const items = readSaleItems();
+  const totals = computeSaleTotals(items, {
+    invoiceType,
+    percIIBB: document.getElementById("sale-perc-iibb").value,
+    percIVA: document.getElementById("sale-perc-iva").value
   });
 
-  const percIIBB = parseFloat(document.getElementById("sale-perc-iibb").value) || 0;
-  const percIVA = parseFloat(document.getElementById("sale-perc-iva").value) || 0;
-  const totalPerc = percIIBB + percIVA;
-  const grandTotal = totalNeto + iva21 + iva105 + totalPerc;
+  items.forEach(it => {
+    const span = it._row.querySelector(".item-subtotal");
+    if (span) span.textContent = formatCurrency(round2(it.qty * it.price));
+  });
 
-  document.getElementById("sale-total-neto").textContent = formatCurrency(totalNeto);
-  document.getElementById("sale-total-iva-21").textContent = formatCurrency(iva21);
-  document.getElementById("sale-total-iva-105").textContent = formatCurrency(iva105);
-  document.getElementById("sale-total-perc").textContent = formatCurrency(totalPerc);
-  document.getElementById("sale-total-final").textContent = formatCurrency(grandTotal);
+  document.getElementById("sale-total-neto").textContent = formatCurrency(totals.netoTotal);
+  document.getElementById("sale-total-iva-21").textContent = formatCurrency(totals.iva21);
+  document.getElementById("sale-total-iva-105").textContent = formatCurrency(totals.iva105);
+  document.getElementById("sale-total-perc").textContent = formatCurrency(totals.percTotal);
+  document.getElementById("sale-total-final").textContent = formatCurrency(totals.total);
 
-  return { totalNeto, neto21, neto105, iva21, iva105, percIIBB, percIVA, totalPerc, grandTotal };
+  return totals;
 }
 
 async function handleSaveSale(e) {
@@ -1101,6 +1125,7 @@ async function handleSaveSale(e) {
   const saveBtn = document.getElementById("save-sale-btn");
   const modal = document.getElementById("sale-modal");
 
+  if (saveBtn.disabled) return; // evita doble envío
   try {
     saveBtn.disabled = true;
     saveBtn.querySelector("span").textContent = "Guardando comprobante...";
@@ -1114,72 +1139,30 @@ async function handleSaveSale(e) {
     const clientAddress = document.getElementById("sale-client-address").value.trim();
     const paymentTerm = document.getElementById("sale-payment-term").value;
 
-    const totals = recalculateSaleTotals();
+    if (!clientName) throw new Error("Ingresá el nombre o razón social del cliente.");
 
-    // Collect line items
-    const rows = document.querySelectorAll("#sale-items-list .sale-item-row");
-    const items = [];
-    rows.forEach(row => {
-      const prodId = row.querySelector(".item-product-select").value;
-      const desc = row.querySelector(".item-desc").value.trim();
-      const qty = parseInt(row.querySelector(".item-qty").value) || 1;
-      const price = parseFloat(row.querySelector(".item-price").value) || 0;
-      const vatRate = parseFloat(row.querySelector(".item-vat").value) || 0;
-      items.push({
-        productId: prodId || null,
-        name: desc,
-        qty,
-        price,
-        vatRate,
-        subtotal: qty * price
-      });
+    const items = readSaleItems().map(({ _row, ...it }) => ({ ...it, subtotal: round2(it.qty * it.price) }));
+    if (items.length === 0) throw new Error("Agregá al menos un artículo al comprobante.");
+    if (items.some(it => !it.name)) throw new Error("Todos los renglones necesitan una descripción.");
+
+    const totals = computeSaleTotals(items, {
+      invoiceType: saleType,
+      percIIBB: document.getElementById("sale-perc-iibb").value,
+      percIVA: document.getElementById("sale-perc-iva").value
     });
+    if (!(totals.total > 0)) throw new Error("El total del comprobante debe ser mayor a 0.");
 
-    if (items.length === 0) {
-      throw new Error("Agregá al menos un artículo al comprobante.");
+    if (isDuplicateInvoiceNumber(allInvoices, { type: "sale", invoiceType: saleType, number: saleNumber })) {
+      throw new Error(`Ya existe un comprobante ${saleType.replace("_", " ")} con el número ${saleNumber}.`);
     }
 
-    const batch = writeBatch(db);
-
-    // 1. Stock deduction for items linked to the catalog
-    for (const item of items) {
-      if (item.productId) {
-        const product = allProducts.find(p => p.id === item.productId);
-        if (product) {
-          const currentStock = parseInt(product.stock) || 0;
-          const newStock = Math.max(0, currentStock - item.qty);
-          batch.update(doc(db, "products", item.productId), {
-            stock: newStock,
-            updated_at: new Date().toISOString()
-          });
-        }
-      }
+    // Aviso previo con datos en caché (la verificación definitiva ocurre dentro de la transacción).
+    const cachedShortages = findStockShortages(items, allProducts);
+    if (cachedShortages.length > 0) {
+      const s = cachedShortages[0];
+      throw new Error(`Stock insuficiente de "${s.name}": pedís ${s.requested} y hay ${s.available}.`);
     }
 
-    // 2. If paid by check, register in checks collection
-    if (paymentTerm === "CONTADO_CHEQUE") {
-      const bank = document.getElementById("sale-check-bank").value.trim();
-      const checkNumber = document.getElementById("sale-check-number").value.trim();
-      const dueDate = document.getElementById("sale-check-due").value;
-      const drawer = document.getElementById("sale-check-drawer").value.trim();
-
-      const checkRef = doc(collection(db, "checks"));
-      batch.set(checkRef, {
-        id: checkRef.id,
-        direction: "RECEIVED",
-        status: "IN_PORTFOLIO",
-        bank: bank || "No especificado",
-        number: checkNumber || "S/N",
-        dueDate: dueDate || saleDate,
-        drawer: drawer || clientName,
-        clientName,
-        amount: totals.grandTotal,
-        receivedDate: saleDate,
-        created_at: new Date().toISOString()
-      });
-    }
-
-    // 3. Create invoice document
     const isCtaCte = paymentTerm === "CTA_CTE";
     const invoiceRef = doc(collection(db, "invoices"));
     const invoiceData = {
@@ -1196,36 +1179,76 @@ async function handleSaveSale(e) {
       items,
       neto21: totals.neto21,
       neto105: totals.neto105,
-      netoTotal: totals.totalNeto,
+      netoTotal: totals.netoTotal,
       iva21: totals.iva21,
       iva105: totals.iva105,
-      ivaTotal: totals.iva21 + totals.iva105,
+      ivaTotal: totals.ivaTotal,
       percIIBB: totals.percIIBB,
       percIVA: totals.percIVA,
-      percTotal: totals.totalPerc,
-      total: totals.grandTotal,
-      pendingBalance: isCtaCte ? totals.grandTotal : 0,
+      percTotal: totals.percTotal,
+      total: totals.total,
+      pendingBalance: isCtaCte ? totals.total : 0,
       status: isCtaCte ? "pending" : "paid",
       created_at: new Date().toISOString()
     };
-    batch.set(invoiceRef, invoiceData);
 
-    // 4. Ensure contact exists in contacts collection
-    const existingContact = allContacts.find(c => c.type === "client" && c.name.toLowerCase() === clientName.toLowerCase());
-    if (!existingContact) {
-      const contactRef = doc(collection(db, "contacts"));
-      batch.set(contactRef, {
-        id: contactRef.id,
-        type: "client",
-        name: clientName,
-        cuit: clientCuit || "-",
-        address: clientAddress || "-",
-        ivaCondition: clientIva,
-        created_at: new Date().toISOString()
+    // Transacción: lee el stock real del servidor, valida y descuenta de forma atómica.
+    // Evita pérdida de actualizaciones si hay dos sesiones/pestañas vendiendo a la vez.
+    const qtyByProduct = new Map();
+    items.forEach(it => {
+      if (it.productId) qtyByProduct.set(it.productId, (qtyByProduct.get(it.productId) || 0) + it.qty);
+    });
+
+    await runTransaction(db, async (tx) => {
+      const productSnaps = [];
+      for (const [productId, qty] of qtyByProduct) {
+        const ref = doc(db, "products", productId);
+        const snap = await tx.get(ref);
+        if (!snap.exists()) throw new Error("Un producto del comprobante ya no existe en el catálogo.");
+        const stock = parseInt(snap.data().stock, 10) || 0;
+        if (qty > stock) {
+          throw new Error(`Stock insuficiente de "${snap.data().name}": pedís ${qty} y hay ${stock}.`);
+        }
+        productSnaps.push({ ref, qty });
+      }
+
+      productSnaps.forEach(({ ref, qty }) => {
+        tx.update(ref, { stock: increment(-qty), updated_at: new Date().toISOString() });
       });
-    }
 
-    await batch.commit();
+      if (paymentTerm === "CONTADO_CHEQUE") {
+        const checkRef = doc(collection(db, "checks"));
+        tx.set(checkRef, {
+          id: checkRef.id,
+          direction: "RECEIVED",
+          status: "IN_PORTFOLIO",
+          bank: document.getElementById("sale-check-bank").value.trim() || "No especificado",
+          number: document.getElementById("sale-check-number").value.trim() || "S/N",
+          dueDate: document.getElementById("sale-check-due").value || saleDate,
+          drawer: document.getElementById("sale-check-drawer").value.trim() || clientName,
+          clientName,
+          amount: totals.total,
+          receivedDate: saleDate,
+          created_at: new Date().toISOString()
+        });
+      }
+
+      tx.set(invoiceRef, invoiceData);
+
+      const existingContact = allContacts.find(c => c.type === "client" && normalizeName(c.name) === normalizeName(clientName));
+      if (!existingContact) {
+        const contactRef = doc(collection(db, "contacts"));
+        tx.set(contactRef, {
+          id: contactRef.id,
+          type: "client",
+          name: clientName,
+          cuit: clientCuit || "-",
+          address: clientAddress || "-",
+          ivaCondition: clientIva,
+          created_at: new Date().toISOString()
+        });
+      }
+    });
 
     showToast(`¡Comprobante ${saleNumber} emitido con éxito!`, "success");
     modal.close();
@@ -1306,8 +1329,8 @@ function renderSalesTable() {
 
     tr.innerHTML = `
       <td>${formatDate(inv.date)}</td>
-      <td><strong>${typeLabel}</strong> <br><small style="color: var(--text-secondary);">${inv.number}</small></td>
-      <td><strong>${inv.clientName}</strong> <br><small style="color: var(--text-secondary);">CUIT: ${inv.clientCuit}</small></td>
+      <td><strong>${typeLabel}</strong> <br><small style="color: var(--text-secondary);">${escapeHtml(inv.number)}</small></td>
+      <td><strong>${escapeHtml(inv.clientName)}</strong> <br><small style="color: var(--text-secondary);">CUIT: ${escapeHtml(inv.clientCuit)}</small></td>
       <td><span class="erp-badge erp-badge-neutral">${condLabel}</span></td>
       <td style="text-align: right; font-weight: 700;">${formatCurrency(inv.total)}</td>
       <td style="text-align: right; color: ${inv.pendingBalance > 0 ? '#DC2626' : '#10B981'}; font-weight: 700;">${formatCurrency(inv.pendingBalance || 0)}</td>
@@ -1411,40 +1434,46 @@ function openPurchaseModal() {
 
   form.reset();
   checkContainer.style.display = "none";
-  dateInput.value = new Date().toISOString().split("T")[0];
+  dateInput.value = localDateISO();
 
   // Populate stock replenishment dropdown
   stockProdSelect.innerHTML = `<option value="">-- Ninguno (No modificar stock) --</option>`;
   allProducts.forEach(prod => {
-    stockProdSelect.innerHTML += `<option value="${prod.id}">${prod.name} (Stock actual: ${prod.stock})</option>`;
+    stockProdSelect.innerHTML += `<option value="${escapeHtml(prod.id)}">${escapeHtml(prod.name)} (Stock actual: ${escapeHtml(prod.stock)})</option>`;
   });
 
   recalculatePurchaseTotal();
   modal.showModal();
 }
 
-function recalculatePurchaseTotal() {
-  const neto21 = parseFloat(document.getElementById("purchase-neto-21").value) || 0;
-  const iva21 = parseFloat(document.getElementById("purchase-iva-21").value) || 0;
-  const neto105 = parseFloat(document.getElementById("purchase-neto-105").value) || 0;
-  const iva105 = parseFloat(document.getElementById("purchase-iva-105").value) || 0;
-  const perc = parseFloat(document.getElementById("purchase-perc").value) || 0;
-  const exempt = parseFloat(document.getElementById("purchase-exempt").value) || 0;
+function readPurchaseAmounts() {
+  return computePurchaseTotals({
+    neto21: document.getElementById("purchase-neto-21").value,
+    iva21: document.getElementById("purchase-iva-21").value,
+    neto105: document.getElementById("purchase-neto-105").value,
+    iva105: document.getElementById("purchase-iva-105").value,
+    perc: document.getElementById("purchase-perc").value,
+    exempt: document.getElementById("purchase-exempt").value
+  });
+}
 
-  const total = neto21 + iva21 + neto105 + iva105 + perc + exempt;
-  document.getElementById("purchase-total-final").textContent = formatCurrency(total);
-  return { neto21, iva21, neto105, iva105, perc, exempt, total };
+function recalculatePurchaseTotal() {
+  const totals = readPurchaseAmounts();
+  document.getElementById("purchase-total-final").textContent = formatCurrency(totals.total);
+  return totals;
 }
 
 function populatePurchaseCheckSelect() {
   const select = document.getElementById("purchase-check-select");
   if (!select) return;
 
+  const previous = select.value; // conserva la selección si el listado se refresca
   const availableChecks = allChecks.filter(c => c.status === "IN_PORTFOLIO");
   select.innerHTML = `<option value="">-- Seleccionar cheque disponible en cartera --</option>`;
   availableChecks.forEach(c => {
-    select.innerHTML += `<option value="${c.id}">${c.bank} N° ${c.number} - Vto: ${formatDate(c.dueDate)} - $${c.amount} (${c.clientName})</option>`;
+    select.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.bank)} N° ${escapeHtml(c.number)} - Vto: ${formatDate(c.dueDate)} - ${formatCurrency(c.amount)} (${escapeHtml(c.clientName)})</option>`;
   });
+  if (previous && availableChecks.some(c => c.id === previous)) select.value = previous;
 }
 
 async function handleSavePurchase(e) {
@@ -1452,6 +1481,7 @@ async function handleSavePurchase(e) {
   const saveBtn = document.getElementById("save-purchase-btn");
   const modal = document.getElementById("purchase-modal");
 
+  if (saveBtn.disabled) return; // evita doble envío
   try {
     saveBtn.disabled = true;
     saveBtn.querySelector("span").textContent = "Guardando compra...";
@@ -1463,77 +1493,104 @@ async function handleSavePurchase(e) {
     const supplierCuit = document.getElementById("purchase-supplier-cuit").value.trim();
     const category = document.getElementById("purchase-category").value;
     const stockProductId = document.getElementById("purchase-stock-product").value;
-    const stockQty = parseInt(document.getElementById("purchase-stock-qty").value) || 0;
+    const stockQty = Math.max(0, parseInt(document.getElementById("purchase-stock-qty").value, 10) || 0);
     const paymentMethod = document.getElementById("purchase-payment-method").value;
-    const endorsedCheckId = document.getElementById("purchase-check-select")?.value;
+    const endorsedCheckId = document.getElementById("purchase-check-select")?.value || "";
 
-    const totals = recalculatePurchaseTotal();
+    const totals = readPurchaseAmounts();
 
-    const batch = writeBatch(db);
+    if (!supplierName) throw new Error("Ingresá el proveedor o acreedor.");
+    if (!(totals.total > 0)) throw new Error("El total de la compra debe ser mayor a 0.");
+    if (stockProductId && stockQty <= 0) throw new Error("Indicá la cantidad a sumar al stock del repuesto elegido.");
+    if (isDuplicateInvoiceNumber(allInvoices, { type: "purchase", invoiceType: type, number, party: supplierName })) {
+      throw new Error(`Ya cargaste el comprobante ${number} de ${supplierName}.`);
+    }
 
-    // 1. Stock replenishment if chosen
-    if (stockProductId && stockQty > 0) {
-      const prod = allProducts.find(p => p.id === stockProductId);
-      if (prod) {
-        batch.update(doc(db, "products", stockProductId), {
-          stock: (parseInt(prod.stock) || 0) + stockQty,
+    const mismatch = type === "GASTO_OPERATIVO" ? [] : purchaseVatMismatch(totals);
+    if (mismatch.length > 0 &&
+        !confirm(`El ${mismatch.join(" y ")} no coincide con el neto ingresado. ¿Guardar de todos modos?`)) {
+      return;
+    }
+
+    if (paymentMethod === "CHEQUE_CARTERA" && !endorsedCheckId) {
+      throw new Error("Elegí el cheque de cartera con el que se paga esta compra.");
+    }
+
+    const invoiceRef = doc(collection(db, "invoices"));
+    let paidByCheck = 0;
+
+    await runTransaction(db, async (tx) => {
+      // Todas las lecturas antes de las escrituras (requisito de las transacciones).
+      let checkRef = null;
+      if (paymentMethod === "CHEQUE_CARTERA") {
+        checkRef = doc(db, "checks", endorsedCheckId);
+        const checkSnap = await tx.get(checkRef);
+        if (!checkSnap.exists() || checkSnap.data().status !== "IN_PORTFOLIO") {
+          throw new Error("El cheque elegido ya no está disponible en cartera.");
+        }
+        paidByCheck = Number(checkSnap.data().amount) || 0;
+        if (paidByCheck - totals.total > 0.009) {
+          throw new Error(`El cheque (${formatCurrency(paidByCheck)}) supera el total de la compra (${formatCurrency(totals.total)}).`);
+        }
+      }
+
+      if (checkRef) {
+        tx.update(checkRef, {
+          status: "ENDORSED",
+          endorsedTo: supplierName,
+          endorsedDate: date,
           updated_at: new Date().toISOString()
         });
       }
-    }
 
-    // 2. Endorse check if paid with portfolio check
-    if (paymentMethod === "CHEQUE_CARTERA" && endorsedCheckId) {
-      batch.update(doc(db, "checks", endorsedCheckId), {
-        status: "ENDORSED",
-        endorsedTo: supplierName,
-        endorsedDate: date,
-        updated_at: new Date().toISOString()
-      });
-    }
+      if (stockProductId && stockQty > 0) {
+        tx.update(doc(db, "products", stockProductId), {
+          stock: increment(stockQty),
+          updated_at: new Date().toISOString()
+        });
+      }
 
-    // 3. Create purchase invoice document
-    const isCtaCte = paymentMethod === "CTA_CTE";
-    const invoiceRef = doc(collection(db, "invoices"));
-    batch.set(invoiceRef, {
-      id: invoiceRef.id,
-      type: "purchase",
-      invoiceType: type,
-      number,
-      date,
-      supplierName,
-      supplierCuit: supplierCuit || "-",
-      category,
-      neto21: totals.neto21,
-      iva21: totals.iva21,
-      neto105: totals.neto105,
-      iva105: totals.iva105,
-      netoTotal: totals.neto21 + totals.neto105,
-      ivaTotal: totals.iva21 + totals.iva105,
-      percTotal: totals.perc,
-      exempt: totals.exempt,
-      total: totals.total,
-      paymentMethod,
-      pendingBalance: isCtaCte ? totals.total : 0,
-      status: isCtaCte ? "pending" : "paid",
-      created_at: new Date().toISOString()
-    });
+      let pendingBalance = 0;
+      if (paymentMethod === "CTA_CTE") pendingBalance = totals.total;
+      else if (paymentMethod === "CHEQUE_CARTERA") pendingBalance = round2(totals.total - paidByCheck);
 
-    // 4. Ensure supplier contact exists
-    const existingSupplier = allContacts.find(c => c.type === "supplier" && c.name.toLowerCase() === supplierName.toLowerCase());
-    if (!existingSupplier) {
-      const contactRef = doc(collection(db, "contacts"));
-      batch.set(contactRef, {
-        id: contactRef.id,
-        type: "supplier",
-        name: supplierName,
-        cuit: supplierCuit || "-",
+      tx.set(invoiceRef, {
+        id: invoiceRef.id,
+        type: "purchase",
+        invoiceType: type,
+        number,
+        date,
+        supplierName,
+        supplierCuit: supplierCuit || "-",
         category,
+        neto21: totals.neto21,
+        iva21: totals.iva21,
+        neto105: totals.neto105,
+        iva105: totals.iva105,
+        netoTotal: totals.netoTotal,
+        ivaTotal: totals.ivaTotal,
+        percTotal: totals.perc,
+        exempt: totals.exempt,
+        total: totals.total,
+        paymentMethod,
+        pendingBalance,
+        status: pendingBalance <= 0 ? "paid" : (pendingBalance < totals.total ? "partial" : "pending"),
         created_at: new Date().toISOString()
       });
-    }
 
-    await batch.commit();
+      const existingSupplier = allContacts.find(c => c.type === "supplier" && normalizeName(c.name) === normalizeName(supplierName));
+      if (!existingSupplier) {
+        const contactRef = doc(collection(db, "contacts"));
+        tx.set(contactRef, {
+          id: contactRef.id,
+          type: "supplier",
+          name: supplierName,
+          cuit: supplierCuit || "-",
+          category,
+          created_at: new Date().toISOString()
+        });
+      }
+    });
 
     showToast(`¡Compra / Gasto "${number}" registrado con éxito!`, "success");
     modal.close();
@@ -1612,8 +1669,8 @@ function renderPurchasesTable() {
 
     tr.innerHTML = `
       <td>${formatDate(p.date)}</td>
-      <td><strong>${typeLabel}</strong> <br><small style="color: var(--text-secondary);">${p.number}</small></td>
-      <td><strong>${p.supplierName}</strong> <br><small style="color: var(--text-secondary);">${p.category}</small></td>
+      <td><strong>${typeLabel}</strong> <br><small style="color: var(--text-secondary);">${escapeHtml(p.number)}</small></td>
+      <td><strong>${escapeHtml(p.supplierName)}</strong> <br><small style="color: var(--text-secondary);">${escapeHtml(p.category)}</small></td>
       <td style="text-align: right;">${formatCurrency(p.netoTotal || 0)}</td>
       <td style="text-align: right; color: #10B981; font-weight: 600;">${formatCurrency(p.ivaTotal || 0)}</td>
       <td style="text-align: right;">${formatCurrency(p.percTotal || 0)}</td>
@@ -1718,6 +1775,22 @@ function initCheckingModule() {
     });
   }
 
+  const portfolioSelect = document.getElementById("payment-portfolio-check-select");
+  if (portfolioSelect) {
+    portfolioSelect.addEventListener("change", () => {
+      const opt = portfolioSelect.options[portfolioSelect.selectedIndex];
+      if (opt && opt.getAttribute("data-amount")) {
+        document.getElementById("payment-amount").value = opt.getAttribute("data-amount");
+        distributePaymentAmountAcrossInvoices();
+      }
+    });
+  }
+
+  const paymentAmountInput = document.getElementById("payment-amount");
+  if (paymentAmountInput) {
+    paymentAmountInput.addEventListener("input", distributePaymentAmountAcrossInvoices);
+  }
+
   if (paymentForm) {
     paymentForm.addEventListener("submit", handleSavePayment);
   }
@@ -1737,8 +1810,8 @@ function updateCheckingKPIs() {
 
   const kpiClients = document.getElementById("checking-kpi-clients-pending");
   const kpiSuppliers = document.getElementById("checking-kpi-suppliers-pending");
-  if (kpiClients) kpiClients.textContent = formatCurrency(clientsPending);
-  if (kpiSuppliers) kpiSuppliers.textContent = formatCurrency(suppliersPending);
+  if (kpiClients) kpiClients.textContent = formatCurrency(round2(clientsPending));
+  if (kpiSuppliers) kpiSuppliers.textContent = formatCurrency(round2(suppliersPending));
 }
 
 function renderCheckingAccounts() {
@@ -1750,50 +1823,10 @@ function renderCheckingAccounts() {
   const query = (document.getElementById("checking-search-filter")?.value || "").toLowerCase().trim();
   const isClients = currentCheckingSubtab === "clients";
 
-  // Group invoices by contact name
-  const contactMap = {};
-
-  allInvoices.forEach(inv => {
-    if (isClients && inv.type === "sale") {
-      const name = inv.clientName || "Sin Nombre";
-      if (!contactMap[name]) {
-        contactMap[name] = {
-          name,
-          cuit: inv.clientCuit || "-",
-          address: inv.clientAddress || "-",
-          totalAmount: 0,
-          pendingAmount: 0,
-          invoicesCount: 0
-        };
-      }
-      contactMap[name].totalAmount += (inv.total || 0);
-      contactMap[name].pendingAmount += (inv.pendingBalance || 0);
-      contactMap[name].invoicesCount++;
-    } else if (!isClients && inv.type === "purchase") {
-      const name = inv.supplierName || "Sin Proveedor";
-      if (!contactMap[name]) {
-        contactMap[name] = {
-          name,
-          cuit: inv.supplierCuit || "-",
-          address: inv.category || "-",
-          totalAmount: 0,
-          pendingAmount: 0,
-          invoicesCount: 0
-        };
-      }
-      contactMap[name].totalAmount += (inv.total || 0);
-      contactMap[name].pendingAmount += (inv.pendingBalance || 0);
-      contactMap[name].invoicesCount++;
-    }
-  });
-
-  let contacts = Object.values(contactMap);
+  let contacts = groupAccountBalances(allInvoices, currentCheckingSubtab);
   if (query) {
-    contacts = contacts.filter(c => c.name.toLowerCase().includes(query) || c.cuit.includes(query));
+    contacts = contacts.filter(c => c.name.toLowerCase().includes(query) || (c.cuit && c.cuit.includes(query)));
   }
-
-  // Sort by pending balance descending (debtors first)
-  contacts.sort((a, b) => b.pendingAmount - a.pendingAmount);
 
   if (contacts.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 24px;">No hay cuentas corrientes en ${isClients ? 'clientes' : 'proveedores'}.</td></tr>`;
@@ -1802,13 +1835,13 @@ function renderCheckingAccounts() {
 
   tbody.innerHTML = "";
   contacts.forEach(c => {
-    const totalPaid = c.totalAmount - c.pendingAmount;
+    const totalPaid = round2(c.totalAmount - c.pendingAmount);
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td><strong>${c.name}</strong> <br><small style="color: var(--text-secondary);">${c.invoicesCount} comprobantes</small></td>
-      <td>${c.cuit}</td>
-      <td>${c.address}</td>
+      <td><strong>${escapeHtml(c.name)}</strong> <br><small style="color: var(--text-secondary);">${c.invoicesCount} comprobantes</small></td>
+      <td>${escapeHtml(c.cuit)}</td>
+      <td>${escapeHtml(c.address)}</td>
       <td style="text-align: right; font-weight: 600;">${formatCurrency(c.totalAmount)}</td>
       <td style="text-align: right; color: #10B981; font-weight: 600;">${formatCurrency(totalPaid)}</td>
       <td style="text-align: right; font-weight: 800; font-size: 0.95rem; color: ${c.pendingAmount > 0 ? (isClients ? '#D97706' : '#DC2626') : '#10B981'};">
@@ -1836,7 +1869,7 @@ function openPaymentModal(direction = "CLIENT_COLLECTION", preselectedContact = 
   const dirSelect = document.getElementById("payment-direction");
 
   form.reset();
-  dateInput.value = new Date().toISOString().split("T")[0];
+  dateInput.value = localDateISO();
   dirSelect.value = direction;
 
   updatePaymentMethodOptions();
@@ -1879,13 +1912,13 @@ function populatePaymentContactSelect(preselected = "") {
   const isClient = dir === "CLIENT_COLLECTION";
 
   // Collect distinct contacts with pending invoices
-  const relevantInvoices = allInvoices.filter(i => (isClient ? i.type === "sale" : i.type === "purchase") && (i.pendingBalance > 0));
-  const contactNames = [...new Set(relevantInvoices.map(i => isClient ? i.clientName : i.supplierName))];
+  const relevantInvoices = allInvoices.filter(i => (isClient ? i.type === "sale" : i.type === "purchase") && ((Number(i.pendingBalance) || 0) > 0));
+  const contactNames = [...new Set(relevantInvoices.map(i => isClient ? i.clientName : i.supplierName).filter(Boolean))];
 
   select.innerHTML = `<option value="">-- Seleccionar Contacto con Saldo Pendiente --</option>`;
   contactNames.forEach(name => {
-    const isSel = name.toLowerCase() === preselected.toLowerCase();
-    select.innerHTML += `<option value="${name}" ${isSel ? 'selected' : ''}>${name}</option>`;
+    const isSel = preselected && normalizeName(name) === normalizeName(preselected);
+    select.innerHTML += `<option value="${escapeHtml(name)}" ${isSel ? 'selected' : ''}>${escapeHtml(name)}</option>`;
   });
 }
 
@@ -1893,19 +1926,15 @@ function populatePortfolioChecksForPayment() {
   const select = document.getElementById("payment-portfolio-check-select");
   if (!select) return;
 
+  const previous = select.value;
   const available = allChecks.filter(c => c.status === "IN_PORTFOLIO");
   select.innerHTML = `<option value="">-- Seleccionar cheque disponible --</option>`;
   available.forEach(c => {
-    select.innerHTML += `<option value="${c.id}" data-amount="${c.amount}">${c.bank} N° ${c.number} - $${c.amount} (Vto: ${formatDate(c.dueDate)})</option>`;
+    select.innerHTML += `<option value="${escapeHtml(c.id)}" data-amount="${c.amount}">${escapeHtml(c.bank)} N° ${escapeHtml(c.number)} - ${formatCurrency(c.amount)} (Vto: ${formatDate(c.dueDate)})</option>`;
   });
-
-  select.addEventListener("change", () => {
-    const opt = select.options[select.selectedIndex];
-    if (opt && opt.getAttribute("data-amount")) {
-      document.getElementById("payment-amount").value = opt.getAttribute("data-amount");
-      distributePaymentAmountAcrossInvoices();
-    }
-  });
+  if (previous && available.some(c => c.id === previous)) {
+    select.value = previous;
+  }
 }
 
 function loadContactPendingInvoicesForPayment(contactName) {
@@ -1917,11 +1946,12 @@ function loadContactPendingInvoicesForPayment(contactName) {
 
   const dir = document.getElementById("payment-direction").value;
   const isClient = dir === "CLIENT_COLLECTION";
+  const targetKey = normalizeName(contactName);
 
   const pendingInvoices = allInvoices.filter(i => 
     (isClient ? i.type === "sale" : i.type === "purchase") &&
-    (isClient ? i.clientName === contactName : i.supplierName === contactName) &&
-    (i.pendingBalance > 0)
+    (isClient ? normalizeName(i.clientName) === targetKey : normalizeName(i.supplierName) === targetKey) &&
+    ((Number(i.pendingBalance) || 0) > 0)
   );
 
   if (pendingInvoices.length === 0) {
@@ -1933,15 +1963,15 @@ function loadContactPendingInvoicesForPayment(contactName) {
   let totalPending = 0;
 
   pendingInvoices.forEach(inv => {
-    totalPending += inv.pendingBalance;
+    totalPending += (Number(inv.pendingBalance) || 0);
     const row = document.createElement("div");
     row.className = "impute-row";
     row.style.cssText = "display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-light); font-size: 0.8rem;";
 
     row.innerHTML = `
       <div style="display: flex; align-items: center; gap: 6px;">
-        <input type="checkbox" class="impute-checkbox" checked data-inv-id="${inv.id}">
-        <span><strong>${inv.invoiceType || 'Comp'}</strong> ${inv.number} (${formatDate(inv.date)})</span>
+        <input type="checkbox" class="impute-checkbox" checked data-inv-id="${escapeHtml(inv.id)}">
+        <span><strong>${escapeHtml(inv.invoiceType || 'Comp')}</strong> ${escapeHtml(inv.number)} (${formatDate(inv.date)})</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="color: var(--text-secondary);">Debe: <strong>${formatCurrency(inv.pendingBalance)}</strong></span>
@@ -1966,10 +1996,7 @@ function loadContactPendingInvoicesForPayment(contactName) {
     container.appendChild(row);
   });
 
-  document.getElementById("payment-amount").value = totalPending.toFixed(2);
-
-  const amountInput = document.getElementById("payment-amount");
-  amountInput.addEventListener("input", distributePaymentAmountAcrossInvoices);
+  document.getElementById("payment-amount").value = round2(totalPending).toFixed(2);
 }
 
 function sumImputeInputs() {
@@ -1978,7 +2005,7 @@ function sumImputeInputs() {
   inputs.forEach(inp => {
     if (!inp.disabled) total += (parseFloat(inp.value) || 0);
   });
-  document.getElementById("payment-amount").value = total.toFixed(2);
+  document.getElementById("payment-amount").value = round2(total).toFixed(2);
 }
 
 function distributePaymentAmountAcrossInvoices() {
@@ -1995,8 +2022,8 @@ function distributePaymentAmountAcrossInvoices() {
       chk.checked = true;
       inp.disabled = false;
       const apply = Math.min(available, inv.pendingBalance);
-      inp.value = apply.toFixed(2);
-      available -= apply;
+      inp.value = round2(apply).toFixed(2);
+      available = round2(available - apply);
     } else {
       chk.checked = false;
       inp.disabled = true;
@@ -2010,6 +2037,7 @@ async function handleSavePayment(e) {
   const saveBtn = document.getElementById("save-payment-btn");
   const modal = document.getElementById("payment-modal");
 
+  if (saveBtn.disabled) return;
   try {
     saveBtn.disabled = true;
     saveBtn.querySelector("span").textContent = "Procesando imputación...";
@@ -2018,7 +2046,7 @@ async function handleSavePayment(e) {
     const contactName = document.getElementById("payment-contact-select").value;
     const date = document.getElementById("payment-date").value;
     const method = document.getElementById("payment-method").value;
-    const totalAmount = parseFloat(document.getElementById("payment-amount").value) || 0;
+    const totalAmount = round2(parseFloat(document.getElementById("payment-amount").value) || 0);
 
     if (!contactName) throw new Error("Seleccioná un contacto.");
     if (totalAmount <= 0) throw new Error("El monto a imputar debe ser mayor a 0.");
@@ -2031,83 +2059,114 @@ async function handleSavePayment(e) {
       const inp = row.querySelector(".impute-input");
       if (chk.checked) {
         const invId = chk.getAttribute("data-inv-id");
-        const applied = parseFloat(inp.value) || 0;
+        const applied = round2(parseFloat(inp.value) || 0);
         if (applied > 0) {
           imputations.push({ invoiceId: invId, amount: applied });
         }
       }
     });
 
-    if (imputations.length === 0) {
-      throw new Error("No seleccionaste comprobantes para cancelar.");
+    const invoicesById = Object.fromEntries(allInvoices.map(i => [i.id, i]));
+    let checkAmount = null;
+    let endorsedCheckId = null;
+
+    if (direction === "SUPPLIER_PAYMENT" && method === "CHEQUE_CARTERA") {
+      endorsedCheckId = document.getElementById("payment-portfolio-check-select")?.value;
+      if (!endorsedCheckId) throw new Error("Elegí el cheque de cartera a endosar.");
+      const cObj = allChecks.find(c => c.id === endorsedCheckId);
+      checkAmount = cObj ? Number(cObj.amount) : null;
     }
 
-    const batch = writeBatch(db);
+    const validationErrors = validateImputation({
+      amount: totalAmount,
+      imputations,
+      invoicesById,
+      checkAmount
+    });
 
-    // 1. Update pending balances of each affected invoice
-    for (const imp of imputations) {
-      const inv = allInvoices.find(i => i.id === imp.invoiceId);
-      if (inv) {
-        const newBalance = Math.max(0, (inv.pendingBalance || 0) - imp.amount);
-        const newStatus = newBalance <= 0.01 ? "paid" : "partial";
-        batch.update(doc(db, "invoices", imp.invoiceId), {
+    if (validationErrors.length > 0) {
+      throw new Error(validationErrors.join(" "));
+    }
+
+    await runTransaction(db, async (tx) => {
+      // 1. Todas las lecturas previas
+      let checkRef = null;
+      if (endorsedCheckId) {
+        checkRef = doc(db, "checks", endorsedCheckId);
+        const checkSnap = await tx.get(checkRef);
+        if (!checkSnap.exists() || checkSnap.data().status !== "IN_PORTFOLIO") {
+          throw new Error("El cheque elegido ya no está disponible en cartera.");
+        }
+      }
+
+      const invoiceSnaps = [];
+      for (const imp of imputations) {
+        const invRef = doc(db, "invoices", imp.invoiceId);
+        const snap = await tx.get(invRef);
+        if (!snap.exists()) {
+          throw new Error("Uno de los comprobantes a imputar ya no existe.");
+        }
+        const curPending = round2(snap.data().pendingBalance || 0);
+        if (imp.amount > curPending + 0.009) {
+          throw new Error(`El comprobante ${snap.data().number} solo adeuda ${formatCurrency(curPending)}. Recargá e intentá de nuevo.`);
+        }
+        invoiceSnaps.push({ snap, applied: imp.amount, curPending });
+      }
+
+      // 2. Escrituras
+      for (const { snap, applied, curPending } of invoiceSnaps) {
+        const newBalance = Math.max(0, round2(curPending - applied));
+        const newStatus = newBalance <= 0.009 ? "paid" : "partial";
+        tx.update(snap.ref, {
           pendingBalance: newBalance,
           status: newStatus,
           updated_at: new Date().toISOString()
         });
       }
-    }
 
-    // 2. If client paid with a new check, register in checks
-    if (direction === "CLIENT_COLLECTION" && method === "CHEQUE_TERCERO") {
-      const bank = document.getElementById("payment-check-bank").value.trim();
-      const checkNum = document.getElementById("payment-check-number").value.trim();
-      const dueDate = document.getElementById("payment-check-due").value;
-      const drawer = document.getElementById("payment-check-drawer").value.trim();
+      if (direction === "CLIENT_COLLECTION" && method === "CHEQUE_TERCERO") {
+        const bank = document.getElementById("payment-check-bank").value.trim();
+        const checkNum = document.getElementById("payment-check-number").value.trim();
+        const dueDate = document.getElementById("payment-check-due").value;
+        const drawer = document.getElementById("payment-check-drawer").value.trim();
 
-      const checkRef = doc(collection(db, "checks"));
-      batch.set(checkRef, {
-        id: checkRef.id,
-        direction: "RECEIVED",
-        status: "IN_PORTFOLIO",
-        bank: bank || "No informado",
-        number: checkNum || "S/N",
-        dueDate: dueDate || date,
-        drawer: drawer || contactName,
-        clientName: contactName,
-        amount: totalAmount,
-        receivedDate: date,
-        created_at: new Date().toISOString()
-      });
-    }
+        const newCheckRef = doc(collection(db, "checks"));
+        tx.set(newCheckRef, {
+          id: newCheckRef.id,
+          direction: "RECEIVED",
+          status: "IN_PORTFOLIO",
+          bank: bank || "No informado",
+          number: checkNum || "S/N",
+          dueDate: dueDate || date,
+          drawer: drawer || contactName,
+          clientName: contactName,
+          amount: totalAmount,
+          receivedDate: date,
+          created_at: new Date().toISOString()
+        });
+      }
 
-    // 3. If paid supplier with a portfolio check, endorse check
-    if (direction === "SUPPLIER_PAYMENT" && method === "CHEQUE_CARTERA") {
-      const checkId = document.getElementById("payment-portfolio-check-select").value;
-      if (checkId) {
-        batch.update(doc(db, "checks", checkId), {
+      if (checkRef) {
+        tx.update(checkRef, {
           status: "ENDORSED",
           endorsedTo: contactName,
           endorsedDate: date,
           updated_at: new Date().toISOString()
         });
       }
-    }
 
-    // 4. Save payment receipt document
-    const paymentRef = doc(collection(db, "payments"));
-    batch.set(paymentRef, {
-      id: paymentRef.id,
-      direction,
-      contactName,
-      date,
-      method,
-      amount: totalAmount,
-      imputations,
-      created_at: new Date().toISOString()
+      const paymentRef = doc(collection(db, "payments"));
+      tx.set(paymentRef, {
+        id: paymentRef.id,
+        direction,
+        contactName,
+        date,
+        method,
+        amount: totalAmount,
+        imputations,
+        created_at: new Date().toISOString()
+      });
     });
-
-    await batch.commit();
 
     showToast(`¡Cobro / Pago de ${formatCurrency(totalAmount)} imputado con éxito!`, "success");
     modal.close();
@@ -2199,18 +2258,18 @@ function renderChecksTable() {
       actionsHtml = `<small style="color: var(--text-secondary);">Acreditado</small>`;
     } else if (c.status === "ENDORSED") {
       statusBadge = `<span class="erp-badge erp-badge-info">Endosado</span>`;
-      actionsHtml = `<small style="color: var(--text-secondary);">A: ${c.endorsedTo || 'Proveedor'}</small>`;
+      actionsHtml = `<small style="color: var(--text-secondary);">A: ${escapeHtml(c.endorsedTo || 'Proveedor')}</small>`;
     } else if (c.status === "REJECTED") {
       statusBadge = `<span class="erp-badge erp-badge-danger">Rechazado</span>`;
       actionsHtml = `<button class="admin-btn act-reopen" style="padding: 4px 8px; font-size: 0.7rem; border-radius: var(--radius-sm); background: var(--bg-surface-low);">Reabrir</button>`;
     }
 
     tr.innerHTML = `
-      <td><strong>${c.number || '-'}</strong></td>
-      <td>${c.bank || '-'}</td>
+      <td><strong>${escapeHtml(c.number || '-')}</strong></td>
+      <td>${escapeHtml(c.bank || '-')}</td>
       <td>${formatDate(c.dueDate)}</td>
-      <td><strong>${c.clientName || '-'}</strong></td>
-      <td>${c.drawer || '-'}</td>
+      <td><strong>${escapeHtml(c.clientName || '-')}</strong></td>
+      <td>${escapeHtml(c.drawer || '-')}</td>
       <td style="text-align: right; font-weight: 700; color: var(--primary-navy);">${formatCurrency(c.amount)}</td>
       <td style="text-align: center;">${statusBadge}</td>
       <td style="text-align: center; white-space: nowrap;">${actionsHtml}</td>
@@ -2236,10 +2295,16 @@ function renderChecksTable() {
 
 async function updateCheckStatus(checkId, newStatus, successMsg) {
   try {
-    await updateDoc(doc(db, "checks", checkId), {
+    const updateData = {
       status: newStatus,
       updated_at: new Date().toISOString()
-    });
+    };
+    if (newStatus === "DEPOSITED") {
+      updateData.depositedDate = localDateISO();
+    } else if (newStatus === "IN_PORTFOLIO") {
+      updateData.depositedDate = null;
+    }
+    await updateDoc(doc(db, "checks", checkId), updateData);
     showToast(successMsg, "success");
   } catch (err) {
     console.error("Error al actualizar cheque:", err);
@@ -2273,10 +2338,10 @@ function initFinanceModule() {
     });
   }
 
-  // Pre-fill date inputs with current month
+  // Pre-fill date inputs with current month (hora local)
   const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-  const today = now.toISOString().split("T")[0];
+  const firstDay = localDateISO(new Date(now.getFullYear(), now.getMonth(), 1));
+  const today = localDateISO(now);
 
   const startInput = document.getElementById("finance-date-start");
   const endInput = document.getElementById("finance-date-end");
@@ -2289,113 +2354,30 @@ function calculateFinancialReport() {
   const startInput = document.getElementById("finance-date-start")?.value;
   const endInput = document.getElementById("finance-date-end")?.value;
 
-  const now = new Date();
-  let startDate = null;
-  let endDate = null;
-
-  if (preset === "CURRENT_MONTH") {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-  } else if (preset === "PREVIOUS_MONTH") {
-    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-  } else if (preset === "CURRENT_YEAR") {
-    startDate = new Date(now.getFullYear(), 0, 1);
-    endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-  } else if (preset === "CUSTOM") {
-    if (startInput) startDate = new Date(startInput + "T00:00:00");
-    if (endInput) endDate = new Date(endInput + "T23:59:59");
-  } // ALL means null boundaries
-
-  // Filter sales and purchases in range
-  const salesInRange = allInvoices.filter(i => {
-    if (i.type !== "sale") return false;
-    if (!startDate && !endDate) return true;
-    const d = new Date(i.date || i.created_at);
-    if (startDate && d < startDate) return false;
-    if (endDate && d > endDate) return false;
-    return true;
-  });
-
-  const purchasesInRange = allInvoices.filter(i => {
-    if (i.type !== "purchase") return false;
-    if (!startDate && !endDate) return true;
-    const d = new Date(i.date || i.created_at);
-    if (startDate && d < startDate) return false;
-    if (endDate && d > endDate) return false;
-    return true;
-  });
-
-  // Sales totals
-  let salesTotal = 0;
-  let salesNeto21 = 0;
-  let salesIva21 = 0;
-  let salesNeto105 = 0;
-  let salesIva105 = 0;
-  let salesPerc = 0;
-
-  salesInRange.forEach(s => {
-    salesTotal += (s.total || 0);
-    salesNeto21 += (s.neto21 || 0);
-    salesIva21 += (s.iva21 || 0);
-    salesNeto105 += (s.neto105 || 0);
-    salesIva105 += (s.iva105 || 0);
-    salesPerc += (s.percTotal || 0);
-  });
-  const salesIvaTotal = salesIva21 + salesIva105;
-
-  // Purchases totals
-  let purchasesTotal = 0;
-  let purchasesNeto21 = 0;
-  let purchasesIva21 = 0;
-  let purchasesNeto105 = 0;
-  let purchasesIva105 = 0;
-  let purchasesPerc = 0;
-
-  purchasesInRange.forEach(p => {
-    purchasesTotal += (p.total || 0);
-    purchasesNeto21 += (p.neto21 || 0);
-    purchasesIva21 += (p.iva21 || 0);
-    purchasesNeto105 += (p.neto105 || 0);
-    purchasesIva105 += (p.iva105 || 0);
-    purchasesPerc += (p.percTotal || 0);
-  });
-  const purchasesIvaTotal = purchasesIva21 + purchasesIva105;
-
-  // Technical VAT balance: Débito Fiscal - Crédito Fiscal
-  const taxNetResult = salesIvaTotal - purchasesIvaTotal;
-
-  // Cashflow: Real cash received vs paid in period
-  let realCashIn = 0;
-  salesInRange.forEach(s => {
-    if (s.paymentTerm !== "CTA_CTE") realCashIn += s.total;
-    else realCashIn += (s.total - (s.pendingBalance || 0));
-  });
-
-  let realCashOut = 0;
-  purchasesInRange.forEach(p => {
-    if (p.paymentMethod !== "CTA_CTE") realCashOut += p.total;
-    else realCashOut += (p.total - (p.pendingBalance || 0));
-  });
-  const cashflowNet = realCashIn - realCashOut;
+  const range = periodRange(preset, new Date(), startInput, endInput);
+  const rep = computeFinancialReport({
+    invoices: allInvoices,
+    payments: allPayments,
+    checks: allChecks
+  }, range);
 
   // Update UI Elements
-  document.getElementById("fin-kpi-sales").textContent = formatCurrency(salesTotal);
-  document.getElementById("fin-kpi-sales-sub").textContent = `${salesInRange.length} comprobantes emitidos`;
+  document.getElementById("fin-kpi-sales").textContent = formatCurrency(rep.sales.total);
+  document.getElementById("fin-kpi-sales-sub").textContent = `${rep.sales.count} comprobantes emitidos`;
 
-  document.getElementById("fin-kpi-purchases").textContent = formatCurrency(purchasesTotal);
-  document.getElementById("fin-kpi-purchases-sub").textContent = `${purchasesInRange.length} facturas/gastos`;
+  document.getElementById("fin-kpi-purchases").textContent = formatCurrency(rep.purchases.total);
+  document.getElementById("fin-kpi-purchases-sub").textContent = `${rep.purchases.count} facturas/gastos`;
 
   const taxCard = document.getElementById("fin-kpi-card-tax");
   const taxBalanceEl = document.getElementById("fin-kpi-tax-balance");
   const taxStatusEl = document.getElementById("fin-kpi-tax-status");
 
-  taxBalanceEl.textContent = formatCurrency(Math.abs(taxNetResult));
-  if (taxNetResult > 0) {
+  taxBalanceEl.textContent = formatCurrency(Math.abs(rep.taxBalance));
+  if (rep.taxBalance > 0) {
     taxStatusEl.textContent = "A Pagar a AFIP (Débito > Crédito)";
     taxStatusEl.style.color = "#DC2626";
     taxCard.className = "finance-kpi-card danger";
-  } else if (taxNetResult < 0) {
+  } else if (rep.taxBalance < 0) {
     taxStatusEl.textContent = "Saldo Técnico a Favor (Crédito > Débito)";
     taxStatusEl.style.color = "#10B981";
     taxCard.className = "finance-kpi-card success";
@@ -2405,33 +2387,33 @@ function calculateFinancialReport() {
     taxCard.className = "finance-kpi-card";
   }
 
-  document.getElementById("fin-kpi-cashflow").textContent = formatCurrency(cashflowNet);
+  document.getElementById("fin-kpi-cashflow").textContent = formatCurrency(rep.cashNet);
 
   // Sales Tax Table
-  document.getElementById("fin-sales-neto-21").textContent = formatCurrency(salesNeto21);
-  document.getElementById("fin-sales-iva-21").textContent = formatCurrency(salesIva21);
-  document.getElementById("fin-sales-neto-105").textContent = formatCurrency(salesNeto105);
-  document.getElementById("fin-sales-iva-105").textContent = formatCurrency(salesIva105);
-  document.getElementById("fin-sales-perc").textContent = formatCurrency(salesPerc);
-  document.getElementById("fin-sales-iva-total").textContent = formatCurrency(salesIvaTotal);
+  document.getElementById("fin-sales-neto-21").textContent = formatCurrency(rep.sales.neto21);
+  document.getElementById("fin-sales-iva-21").textContent = formatCurrency(rep.sales.iva21);
+  document.getElementById("fin-sales-neto-105").textContent = formatCurrency(rep.sales.neto105);
+  document.getElementById("fin-sales-iva-105").textContent = formatCurrency(rep.sales.iva105);
+  document.getElementById("fin-sales-perc").textContent = formatCurrency(rep.sales.perc);
+  document.getElementById("fin-sales-iva-total").textContent = formatCurrency(rep.sales.ivaTotal);
 
   // Purchases Tax Table
-  document.getElementById("fin-purchases-neto-21").textContent = formatCurrency(purchasesNeto21);
-  document.getElementById("fin-purchases-iva-21").textContent = formatCurrency(purchasesIva21);
-  document.getElementById("fin-purchases-neto-105").textContent = formatCurrency(purchasesNeto105);
-  document.getElementById("fin-purchases-iva-105").textContent = formatCurrency(purchasesIva105);
-  document.getElementById("fin-purchases-perc").textContent = formatCurrency(purchasesPerc);
-  document.getElementById("fin-purchases-iva-total").textContent = formatCurrency(purchasesIvaTotal);
+  document.getElementById("fin-purchases-neto-21").textContent = formatCurrency(rep.purchases.neto21);
+  document.getElementById("fin-purchases-iva-21").textContent = formatCurrency(rep.purchases.iva21);
+  document.getElementById("fin-purchases-neto-105").textContent = formatCurrency(rep.purchases.neto105);
+  document.getElementById("fin-purchases-iva-105").textContent = formatCurrency(rep.purchases.iva105);
+  document.getElementById("fin-purchases-perc").textContent = formatCurrency(rep.purchases.perc);
+  document.getElementById("fin-purchases-iva-total").textContent = formatCurrency(rep.purchases.ivaTotal);
 
   // Bottom Banner
   const bannerResult = document.getElementById("fin-tax-net-result");
   const bannerLabel = document.getElementById("fin-tax-net-label");
 
-  bannerResult.textContent = formatCurrency(Math.abs(taxNetResult));
-  if (taxNetResult > 0) {
+  bannerResult.textContent = formatCurrency(Math.abs(rep.taxBalance));
+  if (rep.taxBalance > 0) {
     bannerLabel.textContent = "Saldo Técnico a Pagar a AFIP (Posición Deudora)";
     bannerLabel.style.color = "#FCA5A5";
-  } else if (taxNetResult < 0) {
+  } else if (rep.taxBalance < 0) {
     bannerLabel.textContent = "Saldo Técnico a Favor del Contribuyente";
     bannerLabel.style.color = "#6EE7B7";
   } else {
@@ -2462,6 +2444,17 @@ function initPrintModal() {
   }
 }
 
+const COMPANY_INFO = {
+  name: "CARLITOS AUTOPARTES",
+  subtitle: "Venta de Repuestos y Accesorios del Automotor",
+  address: "Av. San Martín 1540 - Bs. As., Argentina",
+  phone: "Tel: (011) 4567-8900 / carlitosautopartes.com",
+  taxCondition: "IVA Responsable Inscripto",
+  cuit: "30-71239845-8",
+  iibb: "30-71239845-8",
+  startDate: "01/03/2012"
+};
+
 function openPrintVoucher(inv) {
   const modal = document.getElementById("print-modal");
   const container = document.getElementById("print-voucher-content");
@@ -2491,7 +2484,7 @@ function openPrintVoucher(inv) {
       itemsRows += `
         <tr>
           <td style="text-align: center; border-bottom: 1px solid #E2E8F0; padding: 6px;">${item.qty}</td>
-          <td style="border-bottom: 1px solid #E2E8F0; padding: 6px;">${item.name}</td>
+          <td style="border-bottom: 1px solid #E2E8F0; padding: 6px;">${escapeHtml(item.name)}</td>
           <td style="text-align: right; border-bottom: 1px solid #E2E8F0; padding: 6px;">${formatCurrency(item.price)}</td>
           <td style="text-align: center; border-bottom: 1px solid #E2E8F0; padding: 6px;">${item.vatRate}%</td>
           <td style="text-align: right; border-bottom: 1px solid #E2E8F0; padding: 6px; font-weight: 600;">${formatCurrency(item.subtotal)}</td>
@@ -2502,7 +2495,7 @@ function openPrintVoucher(inv) {
     itemsRows = `
       <tr>
         <td style="text-align: center; border-bottom: 1px solid #E2E8F0; padding: 6px;">1</td>
-        <td style="border-bottom: 1px solid #E2E8F0; padding: 6px;">${inv.category || 'Servicios / Conceptos varios'}</td>
+        <td style="border-bottom: 1px solid #E2E8F0; padding: 6px;">${escapeHtml(inv.category || 'Servicios / Conceptos varios')}</td>
         <td style="text-align: right; border-bottom: 1px solid #E2E8F0; padding: 6px;">${formatCurrency(inv.netoTotal || inv.total)}</td>
         <td style="text-align: center; border-bottom: 1px solid #E2E8F0; padding: 6px;">-</td>
         <td style="text-align: right; border-bottom: 1px solid #E2E8F0; padding: 6px; font-weight: 600;">${formatCurrency(inv.total)}</td>
@@ -2522,11 +2515,11 @@ function openPrintVoucher(inv) {
         
         <!-- Left: Company Info -->
         <div style="flex: 1;">
-          <h2 style="margin: 0 0 4px 0; color: #0B2545; font-size: 1.4rem; font-weight: 800;">CARLITOS AUTOPARTES</h2>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Venta de Repuestos y Accesorios del Automotor</p>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Av. San Martín 1540 - Bs. As., Argentina</p>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Tel: (011) 4567-8900 / carlitosautopartes.com</p>
-          <p style="margin: 4px 0 0 0; font-size: 0.8rem; font-weight: 600;">IVA Responsable Inscripto</p>
+          <h2 style="margin: 0 0 4px 0; color: #0B2545; font-size: 1.4rem; font-weight: 800;">${escapeHtml(COMPANY_INFO.name)}</h2>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">${escapeHtml(COMPANY_INFO.subtitle)}</p>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">${escapeHtml(COMPANY_INFO.address)}</p>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">${escapeHtml(COMPANY_INFO.phone)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 0.8rem; font-weight: 600;">${escapeHtml(COMPANY_INFO.taxCondition)}</p>
         </div>
 
         <!-- Center: Voucher Type Letter Badge -->
@@ -2537,25 +2530,25 @@ function openPrintVoucher(inv) {
         <!-- Right: Invoice Metadata -->
         <div style="flex: 1; text-align: right;">
           <h3 style="margin: 0 0 4px 0; color: #0B2545; font-size: 1.15rem; font-weight: 800;">${typeTitle}</h3>
-          <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0B2545;">N°: ${inv.number}</p>
+          <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0B2545;">N°: ${escapeHtml(inv.number)}</p>
           <p style="margin: 0; font-size: 0.8rem; color: #475569;">Fecha: <strong>${formatDate(inv.date)}</strong></p>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">CUIT: <strong>30-71239845-8</strong></p>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Ingresos Brutos: <strong>30-71239845-8</strong></p>
-          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Inicio de Actividades: <strong>01/03/2012</strong></p>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">CUIT: <strong>${escapeHtml(COMPANY_INFO.cuit)}</strong></p>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Ingresos Brutos: <strong>${escapeHtml(COMPANY_INFO.iibb)}</strong></p>
+          <p style="margin: 0; font-size: 0.8rem; color: #475569;">Inicio de Actividades: <strong>${escapeHtml(COMPANY_INFO.startDate)}</strong></p>
         </div>
       </div>
 
       <!-- Customer / Entity Box -->
       <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.82rem;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-          <span>${isSale ? 'Señor(es)' : 'Proveedor'}: <strong>${clientOrSupplierName}</strong></span>
-          <span>CUIT / DNI: <strong>${clientOrSupplierCuit}</strong></span>
+          <span>${isSale ? 'Señor(es)' : 'Proveedor'}: <strong>${escapeHtml(clientOrSupplierName)}</strong></span>
+          <span>CUIT / DNI: <strong>${escapeHtml(clientOrSupplierCuit)}</strong></span>
         </div>
         <div style="display: flex; justify-content: space-between;">
-          <span>Condición IVA: <strong>${inv.clientIva || 'Consumidor Final'}</strong></span>
-          <span>Condición de Venta: <strong>${condition}</strong></span>
+          <span>Condición IVA: <strong>${escapeHtml(inv.clientIva || 'Consumidor Final')}</strong></span>
+          <span>Condición de Venta: <strong>${escapeHtml(condition)}</strong></span>
         </div>
-        ${inv.clientAddress ? `<div style="margin-top: 4px; color: #64748B;">Domicilio: ${inv.clientAddress}</div>` : ''}
+        ${inv.clientAddress ? `<div style="margin-top: 4px; color: #64748B;">Domicilio: ${escapeHtml(inv.clientAddress)}</div>` : ''}
       </div>
 
       <!-- Line Items Table -->

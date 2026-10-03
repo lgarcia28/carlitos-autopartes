@@ -3,19 +3,21 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "firestore.rules",
       "**/.*",
       "**/node_modules/**",
-      "task.md",
-      "walkthrough.md",
-      "implementation_plan.md",
-      "seed-products.cjs",
-      "seed-rest.cjs",
+      "archivos/**",
+      "tests/**",
+      "**/*.xls",
+      "**/*.xlsx",
+      "**/*.cjs",
+      "**/*.md",
       "package.json",
       "package-lock.json"
     ],
     "headers": [
       {
-        "source": "**/*.@(html|js|json)",
+        "source": "**/*.@(html|js|mjs|json)",
         "headers": [
           {
             "key": "Cache-Control",

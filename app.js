@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { escapeHtml } from "./erp-logic.mjs?v=1";
 
 // --- FIREBASE WEB SDK INITIALIZATION ---
 const firebaseConfig = {
@@ -470,18 +471,18 @@ document.addEventListener("DOMContentLoaded", () => {
       card.style.animationDelay = `${index * 0.04}s`;
       card.innerHTML = `
         <div class="product-img-wrapper">
-          <span class="category-tag">${p.category}</span>
-          <img src="${p.image_url}" alt="${p.name}" class="product-img" loading="lazy">
+          <span class="category-tag">${escapeHtml(p.category)}</span>
+          <img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" class="product-img" loading="lazy">
         </div>
         <div class="product-info">
-          <h4 class="product-title">${p.name}</h4>
-          <p class="product-description">${p.description}</p>
+          <h4 class="product-title">${escapeHtml(p.name)}</h4>
+          <p class="product-description">${escapeHtml(p.description)}</p>
         </div>
         <div class="product-footer">
           <div class="price-stock-wrapper">
             <span class="product-price">${formatARS(p.price)}</span>
           </div>
-          <button class="add-to-cart-btn" data-product-id="${p.id}">
+          <button class="add-to-cart-btn" data-product-id="${escapeHtml(p.id)}">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -585,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#25D366" style="inline-size: 18px; block-size: 18px; flex-shrink: 0;">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
       </svg>
-      <span>${message}</span>
+      <span>${escapeHtml(message)}</span>
       <button class="toast-action-btn" id="toast-action">Ver pedido</button>
     `;
 
@@ -639,9 +640,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const itemRow = document.createElement("div");
       itemRow.className = "cart-item";
       itemRow.innerHTML = `
-        <img src="${item.product.image_url}" alt="${item.product.name}" class="cart-item-img">
+        <img src="${escapeHtml(item.product.image_url)}" alt="${escapeHtml(item.product.name)}" class="cart-item-img">
         <div class="cart-item-details">
-          <span class="cart-item-name">${item.product.name}</span>
+          <span class="cart-item-name">${escapeHtml(item.product.name)}</span>
           <span class="cart-item-price">${formatARS(item.product.price)} c/u</span>
           
           <div class="cart-item-actions">
