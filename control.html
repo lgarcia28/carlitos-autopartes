@@ -98,6 +98,8 @@
     }
     
     .form-control {
+      width: 100%;
+      box-sizing: border-box;
       padding: 10px 14px;
       border-radius: var(--radius-md);
       border: 1.5px solid var(--border-light);
@@ -759,6 +761,43 @@
       border-block-start: 1.5px solid var(--border-light);
       padding-block-start: 6px;
       margin-block-start: 4px;
+    }
+
+    /* Sale Item Dynamic Rows Styling */
+    .sale-item-row {
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s ease;
+    }
+    .sale-item-row:hover {
+      border-color: #CBD5E1;
+    }
+    .sale-item-top {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .sale-item-inputs-grid {
+      display: grid;
+      grid-template-columns: 85px 1.4fr 105px 1.4fr;
+      gap: 12px;
+      align-items: end;
+      background-color: var(--bg-surface-low);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+    }
+    @media (max-width: 640px) {
+      .sale-item-inputs-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
     }
 
     /* Voucher Print Styling */
@@ -1926,6 +1965,6 @@
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
   <!-- Firebase Connection via script modules -->
-  <script type="module" src="control.js?v=14"></script>
+  <script type="module" src="control.js?v=15"></script>
 </body>
 </html>

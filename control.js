@@ -1010,7 +1010,6 @@ function addSaleItemRow(item = {}) {
   const itemsList = document.getElementById("sale-items-list");
   const row = document.createElement("div");
   row.className = "sale-item-row";
-  row.style.cssText = "display: flex; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-light); flex-wrap: wrap;";
 
   // Build product options from allProducts (datos escapados: vienen de la base de datos)
   let productOptionsHtml = `<option value="">-- Repuesto Manual / Detalle Libre --</option>`;
@@ -1018,37 +1017,54 @@ function addSaleItemRow(item = {}) {
     productOptionsHtml += `<option value="${escapeHtml(prod.id)}" data-price="${escapeHtml(prod.price)}" data-name="${escapeHtml(prod.name)}" data-stock="${escapeHtml(prod.stock)}">${escapeHtml(prod.name)} (Stk: ${escapeHtml(prod.stock)}) - $${escapeHtml(prod.price)}</option>`;
   });
 
-
   row.innerHTML = `
-    <div style="flex: 2; min-width: 180px;">
-      <select class="form-control item-product-select" style="font-size: 0.8rem; margin-bottom: 4px;">
-        ${productOptionsHtml}
-      </select>
-      <input type="text" class="form-control item-desc" placeholder="Descripción del repuesto" value="${escapeHtml(item.name || '')}" required style="font-size: 0.8rem;">
+    <div class="sale-item-top">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em;">
+          Artículo / Repuesto
+        </label>
+        <select class="form-control item-product-select" style="font-size: 0.85rem; padding: 8px 10px;">
+          ${productOptionsHtml}
+        </select>
+        <input type="text" class="form-control item-desc" placeholder="Descripción detallada del repuesto..." value="${escapeHtml(item.name || '')}" required style="font-size: 0.85rem; padding: 8px 10px;">
+      </div>
+      <button type="button" class="admin-btn-danger remove-item-btn" style="padding: 8px 12px; border-radius: var(--radius-sm); margin-top: 22px; flex-shrink: 0;" title="Eliminar este artículo">
+        ✕
+      </button>
     </div>
-    <div style="width: 70px;">
-      <label style="font-size: 0.65rem; color: var(--text-secondary); display: block;">Cant.</label>
-      <input type="number" class="form-control item-qty" value="${item.qty || 1}" min="1" required style="font-size: 0.8rem;">
+
+    <div class="sale-item-inputs-grid">
+      <div>
+        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase;">
+          Cant.
+        </label>
+        <input type="number" class="form-control item-qty" value="${item.qty || 1}" min="1" required style="font-size: 0.85rem; padding: 6px 8px; text-align: center;">
+      </div>
+      <div>
+        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase;">
+          P. Unit ($)
+        </label>
+        <input type="number" class="form-control item-price" value="${item.price || 0}" step="0.01" min="0" required style="font-size: 0.85rem; padding: 6px 8px; text-align: right;">
+      </div>
+      <div>
+        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase;">
+          Alíc. IVA
+        </label>
+        <select class="form-control item-vat" style="font-size: 0.85rem; padding: 6px 8px;">
+          <option value="21" ${item.vatRate === 21 ? 'selected' : ''}>21%</option>
+          <option value="10.5" ${item.vatRate === 10.5 ? 'selected' : ''}>10.5%</option>
+          <option value="0" ${item.vatRate === 0 ? 'selected' : ''}>0%</option>
+        </select>
+      </div>
+      <div style="text-align: right;">
+        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase;">
+          Subtotal
+        </label>
+        <span class="item-subtotal" style="font-weight: 800; font-size: 1.05rem; color: var(--primary-navy); display: block; padding-top: 4px; white-space: nowrap;">
+          $0.00
+        </span>
+      </div>
     </div>
-    <div style="width: 100px;">
-      <label style="font-size: 0.65rem; color: var(--text-secondary); display: block;">P. Unit ($)</label>
-      <input type="number" class="form-control item-price" value="${item.price || 0}" step="0.01" min="0" required style="font-size: 0.8rem;">
-    </div>
-    <div style="width: 80px;">
-      <label style="font-size: 0.65rem; color: var(--text-secondary); display: block;">IVA</label>
-      <select class="form-control item-vat" style="font-size: 0.8rem;">
-        <option value="21" ${item.vatRate === 21 ? 'selected' : ''}>21%</option>
-        <option value="10.5" ${item.vatRate === 10.5 ? 'selected' : ''}>10.5%</option>
-        <option value="0" ${item.vatRate === 0 ? 'selected' : ''}>0%</option>
-      </select>
-    </div>
-    <div style="width: 90px; text-align: right;">
-      <label style="font-size: 0.65rem; color: var(--text-secondary); display: block;">Subtotal</label>
-      <span class="item-subtotal" style="font-weight: 700; font-size: 0.85rem; color: var(--primary-navy);">$0.00</span>
-    </div>
-    <button type="button" class="admin-btn-danger remove-item-btn" style="padding: 4px 8px; border-radius: var(--radius-sm); align-self: flex-end;" title="Eliminar fila">
-      ✕
-    </button>
   `;
 
   // Select change handler: auto fill description & price
