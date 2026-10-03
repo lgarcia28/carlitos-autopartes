@@ -34,8 +34,9 @@ import {
   applyPayment,
   validateImputation,
   groupAccountBalances,
-  computeFinancialReport
-} from "./erp-logic.mjs?v=1";
+  computeFinancialReport,
+  filterProducts
+} from "./erp-logic.mjs?v=2";
 
 
 // --- FIREBASE WEB SDK INITIALIZATION ---
@@ -82,6 +83,7 @@ const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const saveProductBtn = document.getElementById("save-product-btn");
 
 const prodName = document.getElementById("prod-name");
+const prodCode = document.getElementById("prod-code");
 const prodDesc = document.getElementById("prod-desc");
 const prodCategory = document.getElementById("prod-category");
 const prodBrand = document.getElementById("prod-brand");
@@ -251,6 +253,7 @@ productForm.addEventListener("submit", async (e) => {
 
   const id = editProductId.value;
   const name = prodName.value.trim();
+  const code = prodCode ? prodCode.value.trim().toUpperCase() : "";
   const description = prodDesc.value.trim();
   const category = prodCategory.value;
   const brand = prodBrand.value.trim();
@@ -278,6 +281,7 @@ productForm.addEventListener("submit", async (e) => {
 
     const productData = {
       name,
+      code,
       description,
       category,
       brand,
@@ -340,6 +344,7 @@ function editProduct(prod) {
   cancelEditBtn.style.display = "inline-block";
 
   prodName.value = prod.name;
+  if (prodCode) prodCode.value = prod.code || "";
   prodDesc.value = prod.description;
   prodCategory.value = prod.category;
   prodBrand.value = prod.brand;
@@ -361,6 +366,7 @@ function editProduct(prod) {
 function resetFormState() {
   productForm.reset();
   editProductId.value = "";
+  if (prodCode) prodCode.value = "";
   prodImageUrl.value = "";
   formActionTitle.textContent = "Cargar Producto Nuevo";
   cancelEditBtn.style.display = "none";
@@ -441,6 +447,7 @@ function applyAdminFilters() {
   const filtered = allProducts.filter(prod => {
     const matchesSearch = !query || 
       (prod.name && prod.name.toLowerCase().includes(query)) ||
+      (prod.code && prod.code.toLowerCase().includes(query)) ||
       (prod.brand && prod.brand.toLowerCase().includes(query)) ||
       (prod.model && prod.model.toLowerCase().includes(query)) ||
       (prod.description && prod.description.toLowerCase().includes(query));
@@ -471,10 +478,11 @@ function renderAdminProducts(productsArray) {
   productsArray.forEach(prod => {
     const card = document.createElement("div");
     card.className = "manage-item-card";
+    const codeTag = prod.code ? `<span class="product-code-tag">${escapeHtml(prod.code)}</span> ` : "";
     card.innerHTML = `
       <img src="${escapeHtml(prod.image_url)}" alt="${escapeHtml(prod.name)}" class="manage-item-img">
       <div class="manage-item-info">
-        <span class="manage-item-title">${escapeHtml(prod.name)}</span>
+        <span class="manage-item-title">${codeTag}${escapeHtml(prod.name)}</span>
         <span class="manage-item-meta">${escapeHtml(prod.category)} | ${escapeHtml(prod.brand)} ${escapeHtml(prod.model)} (${escapeHtml(prod.year_start)}-${escapeHtml(prod.year_end)})</span>
       </div>
       <div class="manage-item-inputs">
@@ -543,6 +551,7 @@ function renderSeedMigrationOffer() {
 
       const seedProducts = [
         {
+          code: "TAZ-14-DEP",
           name: "Juego de Tazas Rodado 14 Deportivo",
           description: "Juego de 4 tazas deportivas universales rodado 14, plástico ABS flexible resistente a impactos.",
           category: "Tazas y Molduras",
@@ -555,6 +564,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1611245789429-281b37803a67?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "OPT-HIL-16",
           name: "Óptica Delantera Toyota Hilux 2016-2020",
           description: "Óptica delantera derecha homologada, acrílico de alta transparencia y lúmenes reforzados.",
           category: "Faros y Ópticas",
@@ -567,6 +577,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1606577924006-27d39b132ae2?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "ESP-GOL-12",
           name: "Espejo Eléctrico Volkswagen Gol Trend",
           description: "Espejo exterior eléctrico completo con carcasa lista para pintar, lado acompañante.",
           category: "Espejos y Levantacristales",
@@ -579,6 +590,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "MAN-FIE-10",
           name: "Manija Exterior Puerta delantera Ford Fiesta",
           description: "Manija exterior de puerta delantera color negro texturado, repuesto original homologado.",
           category: "Manijas y Cerraduras",
@@ -591,6 +603,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "VOL-DEP-01",
           name: "Volante Deportivo Cuerina Confort",
           description: "Volante deportivo universal tapizado en cuerina negra con centro reforzado de aluminio.",
           category: "Volantes Deportivos y Accesorios",
@@ -603,6 +616,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "FAR-208-20",
           name: "Faro Trasero Peugeot 208 II 2020+",
           description: "Faro trasero derecho acrílico con tecnología LED integrada, alta visibilidad nocturna.",
           category: "Faros y Ópticas",
@@ -615,6 +629,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "LEV-UNO-04",
           name: "Kit Levantacristal Manual Fiat Uno 2p",
           description: "Máquina levantacristal manual lado conductor para modelo 2 puertas, incluye manija rotativa.",
           category: "Espejos y Levantacristales",
@@ -627,6 +642,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "CER-CRU-16",
           name: "Cerradura Portón Trasero Chevrolet Cruze",
           description: "Cerradura eléctrica de baúl/portón trasero con sensor de apertura integrado, repuesto original.",
           category: "Manijas y Cerraduras",
@@ -639,6 +655,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "MAS-REN-08",
           name: "Masa Adaptadora Volante Sandero / Logan",
           description: "Masa de aluminio estriado universal para colocación de volantes deportivos en línea Renault.",
           category: "Volantes Deportivos y Accesorios",
@@ -651,6 +668,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "MOL-COR-14",
           name: "Moldura Paragolpe Delantero Toyota Corolla",
           description: "Moldura embellecedora cromada delantera derecha para paragolpes, encaje a presión original.",
           category: "Tazas y Molduras",
@@ -663,6 +681,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "OPT-AMA-10",
           name: "Óptica Auxiliar Antiniebla Volkswagen Amarok",
           description: "Faro auxiliar antiniebla delantero izquierdo, lente de vidrio y lámpara halógena incluida.",
           category: "Faros y Ópticas",
@@ -675,6 +694,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "LEV-ONI-13",
           name: "Levantacristal Eléctrico Chevrolet Onix/Prisma",
           description: "Kit de máquina levantacristal eléctrica delantera derecha sin motor, repuesto certificado original.",
           category: "Espejos y Levantacristales",
@@ -687,6 +707,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "CER-DUN-89",
           name: "Juego de Cerraduras de Puerta Fiat Duna/Uno",
           description: "Juego de 2 cilindros/tambores de cerradura con llaves idénticas para puertas izquierda y derecha.",
           category: "Manijas y Cerraduras",
@@ -699,6 +720,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "ALF-COR-14",
           name: "Juego de Alfombras de Goma Pesada Toyota Corolla",
           description: "Kit de 3 alfombras de goma virgen pesada antideslizante con logo bordado para habitáculo.",
           category: "Volantes Deportivos y Accesorios",
@@ -711,6 +733,7 @@ function renderSeedMigrationOffer() {
           image_url: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?q=80&w=600&auto=format&fit=crop"
         },
         {
+          code: "TAZ-13-MAT",
           name: "Tazas Rodado 13 Deportivo Negro Mate",
           description: "Juego de 4 tazas deportivas universales rodado 13, acabado color negro mate texturado premium.",
           category: "Tazas y Molduras",
@@ -1011,23 +1034,54 @@ function addSaleItemRow(item = {}) {
   const row = document.createElement("div");
   row.className = "sale-item-row";
 
-  // Build product options from allProducts (datos escapados: vienen de la base de datos)
-  let productOptionsHtml = `<option value="">-- Repuesto Manual / Detalle Libre --</option>`;
-  allProducts.forEach(prod => {
-    productOptionsHtml += `<option value="${escapeHtml(prod.id)}" data-price="${escapeHtml(prod.price)}" data-name="${escapeHtml(prod.name)}" data-stock="${escapeHtml(prod.stock)}">${escapeHtml(prod.name)} (Stk: ${escapeHtml(prod.stock)}) - $${escapeHtml(prod.price)}</option>`;
-  });
-
   row.innerHTML = `
     <div class="sale-item-top">
-      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em;">
-          Artículo / Repuesto
-        </label>
-        <select class="form-control item-product-select" style="font-size: 0.85rem; padding: 8px 10px;">
-          ${productOptionsHtml}
-        </select>
-        <input type="text" class="form-control item-desc" placeholder="Descripción detallada del repuesto..." value="${escapeHtml(item.name || '')}" required style="font-size: 0.85rem; padding: 8px 10px;">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+          <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em;">
+            Artículo / Repuesto
+          </label>
+          <span class="catalog-linked-badge" style="display: none; font-size: 0.72rem; color: #059669; font-weight: 600;">
+            ✔ Enlazado al catálogo (descuenta stock)
+          </span>
+        </div>
+
+        <!-- Search Bar with Live Filter -->
+        <div class="product-search-container">
+          <div style="display: flex; gap: 6px;">
+            <div style="position: relative; flex: 1; min-width: 0;">
+              <input type="text" class="form-control item-search-input" placeholder="🔍 Buscar por código (ej: OPT-01, 100FAT) o descripción..." autocomplete="off" style="font-size: 0.85rem; padding: 8px 10px 8px 30px;">
+              <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; opacity: 0.5; pointer-events: none;">🔍</span>
+            </div>
+            <button type="button" class="admin-btn admin-btn-secondary browse-catalog-btn" title="Explorar todo el catálogo de repuestos" style="padding: 6px 10px; font-size: 0.75rem; white-space: nowrap; border: 1px solid var(--border-light); flex-shrink: 0;">
+              📋 Catálogo
+            </button>
+          </div>
+
+          <!-- Autocomplete Dropdown List -->
+          <div class="product-search-dropdown" style="display: none;"></div>
+        </div>
+
+        <!-- Hidden Product ID Field -->
+        <input type="hidden" class="item-product-id" value="${escapeHtml(item.productId || '')}">
+
+        <!-- Linked Product Indicator Pill -->
+        <div class="linked-product-pill" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden;">
+            <span style="font-size: 0.9rem;">📦</span>
+            <span class="pill-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.78rem;"></span>
+          </div>
+          <button type="button" class="pill-unlink-btn" title="Desvincular del catálogo para permitir ítem manual libre">
+            ✕ Quitar enlace
+          </button>
+        </div>
+
+        <!-- Detailed Description Input for Invoices -->
+        <div>
+          <input type="text" class="form-control item-desc" placeholder="Descripción detallada del repuesto a imprimir..." value="${escapeHtml(item.name || '')}" required style="font-size: 0.85rem; padding: 8px 10px;">
+        </div>
       </div>
+
       <button type="button" class="admin-btn-danger remove-item-btn" style="padding: 8px 12px; border-radius: var(--radius-sm); margin-top: 22px; flex-shrink: 0;" title="Eliminar este artículo">
         ✕
       </button>
@@ -1067,21 +1121,180 @@ function addSaleItemRow(item = {}) {
     </div>
   `;
 
-  // Select change handler: auto fill description & price
-  const productSelect = row.querySelector(".item-product-select");
+  const searchInput = row.querySelector(".item-search-input");
+  const dropdown = row.querySelector(".product-search-dropdown");
+  const browseBtn = row.querySelector(".browse-catalog-btn");
+  const productIdInput = row.querySelector(".item-product-id");
+  const linkedPill = row.querySelector(".linked-product-pill");
+  const linkedBadge = row.querySelector(".catalog-linked-badge");
+  const pillText = row.querySelector(".pill-text");
+  const unlinkBtn = row.querySelector(".pill-unlink-btn");
   const descInput = row.querySelector(".item-desc");
   const priceInput = row.querySelector(".item-price");
   const qtyInput = row.querySelector(".item-qty");
   const vatSelect = row.querySelector(".item-vat");
   const removeBtn = row.querySelector(".remove-item-btn");
 
-  productSelect.addEventListener("change", () => {
-    const selectedOption = productSelect.options[productSelect.selectedIndex];
-    if (selectedOption.value) {
-      descInput.value = selectedOption.getAttribute("data-name");
-      priceInput.value = selectedOption.getAttribute("data-price");
+  let currentResults = [];
+  let highlightedIndex = -1;
+
+  function updateLinkedProductUI(prod) {
+    if (prod) {
+      productIdInput.value = prod.id;
+      const codePart = prod.code ? `[${escapeHtml(prod.code)}] ` : "";
+      const stockColor = (prod.stock || 0) > 0 ? "#15803D" : "#B91C1C";
+      const stockText = (prod.stock || 0) > 0 ? `Stock: ${prod.stock} u.` : "Sin stock disponible";
+      pillText.innerHTML = `<strong>${codePart}${escapeHtml(prod.name)}</strong> • <span style="color: ${stockColor}; font-weight: 700;">${stockText}</span>`;
+      linkedPill.style.display = "flex";
+      linkedBadge.style.display = "inline";
+    } else {
+      productIdInput.value = "";
+      linkedPill.style.display = "none";
+      linkedBadge.style.display = "none";
+      pillText.textContent = "";
     }
+  }
+
+  // Pre-link if an existing item with productId was passed
+  if (item.productId) {
+    const existingProd = allProducts.find(p => p.id === item.productId);
+    if (existingProd) updateLinkedProductUI(existingProd);
+  }
+
+  function selectProduct(prod) {
+    if (!prod) return;
+    updateLinkedProductUI(prod);
+    descInput.value = prod.name || "";
+    priceInput.value = prod.price || 0;
+    searchInput.value = "";
+    dropdown.style.display = "none";
+    highlightedIndex = -1;
     recalculateSaleTotals();
+    qtyInput.focus();
+    qtyInput.select();
+  }
+
+  function renderDropdownList(list, activeIdx = -1) {
+    currentResults = list || [];
+    highlightedIndex = activeIdx;
+
+    if (currentResults.length === 0) {
+      dropdown.innerHTML = `
+        <div style="padding: 10px 12px; font-size: 0.78rem; color: var(--text-secondary); text-align: center;">
+          No se encontraron repuestos con ese código o descripción.<br>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Podés cargar el artículo escribiendo directamente en la descripción abajo.</span>
+        </div>
+      `;
+      dropdown.style.display = "block";
+      return;
+    }
+
+    let html = "";
+    currentResults.forEach((prod, idx) => {
+      const codeBadge = prod.code 
+        ? `<span class="product-search-code-badge">${escapeHtml(prod.code)}</span>`
+        : `<span class="product-search-code-badge">#${escapeHtml((prod.id || '').slice(-6))}</span>`;
+      const stock = parseInt(prod.stock, 10) || 0;
+      const stockClass = stock > 3 ? "in-stock" : (stock > 0 ? "low-stock" : "no-stock");
+      const stockLabel = stock > 0 ? `Stock: ${stock} u.` : "Sin stock";
+      const activeClass = idx === highlightedIndex ? " active" : "";
+
+      html += `
+        <div class="product-search-item${activeClass}" data-idx="${idx}">
+          <div class="product-search-item-header">
+            <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+              ${codeBadge}
+              <span class="product-search-item-name">${escapeHtml(prod.name)}</span>
+            </div>
+            <strong style="color: var(--primary-navy); white-space: nowrap; font-size: 0.85rem; margin-left: 8px;">
+              $${formatCurrency(prod.price)}
+            </strong>
+          </div>
+          <div class="product-search-item-meta">
+            <span>${escapeHtml(prod.brand || '')} ${escapeHtml(prod.model || '')} ${prod.year_start ? `(${prod.year_start}-${prod.year_end})` : ''}</span>
+            <span class="product-stock-tag ${stockClass}">${stockLabel}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    dropdown.innerHTML = html;
+    dropdown.style.display = "block";
+
+    dropdown.querySelectorAll(".product-search-item").forEach(el => {
+      el.addEventListener("mousedown", (ev) => {
+        ev.preventDefault();
+        const idx = parseInt(el.getAttribute("data-idx"), 10);
+        if (currentResults[idx]) {
+          selectProduct(currentResults[idx]);
+        }
+      });
+    });
+  }
+
+  function triggerSearch() {
+    const q = searchInput.value.trim();
+    const matches = filterProducts(allProducts, q, 25);
+    renderDropdownList(matches, matches.length > 0 ? 0 : -1);
+  }
+
+  searchInput.addEventListener("input", triggerSearch);
+  searchInput.addEventListener("focus", () => {
+    const q = searchInput.value.trim();
+    const matches = filterProducts(allProducts, q, 25);
+    renderDropdownList(matches, -1);
+  });
+
+  searchInput.addEventListener("keydown", (e) => {
+    if (dropdown.style.display !== "block") {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        triggerSearch();
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        highlightedIndex = (highlightedIndex + 1) % currentResults.length;
+        renderDropdownList(currentResults, highlightedIndex);
+        const activeEl = dropdown.querySelectorAll(".product-search-item")[highlightedIndex];
+        if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        highlightedIndex = (highlightedIndex - 1 + currentResults.length) % currentResults.length;
+        renderDropdownList(currentResults, highlightedIndex);
+        const activeEl = dropdown.querySelectorAll(".product-search-item")[highlightedIndex];
+        if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
+      }
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && highlightedIndex < currentResults.length) {
+        e.preventDefault();
+        selectProduct(currentResults[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      dropdown.style.display = "none";
+    }
+  });
+
+  browseBtn.addEventListener("click", () => {
+    const matches = filterProducts(allProducts, "", 30);
+    renderDropdownList(matches, -1);
+    searchInput.focus();
+  });
+
+  unlinkBtn.addEventListener("click", () => {
+    updateLinkedProductUI(null);
+    showToast("Repuesto desvinculado del catálogo. Queda como ítem libre sin descuento de stock.", "info");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!row.contains(e.target)) {
+      dropdown.style.display = "none";
+    }
   });
 
   qtyInput.addEventListener("input", recalculateSaleTotals);
@@ -1104,11 +1317,11 @@ function addSaleItemRow(item = {}) {
 function readSaleItems() {
   const rows = document.querySelectorAll("#sale-items-list .sale-item-row");
   return Array.from(rows).map(row => ({
-    productId: row.querySelector(".item-product-select").value || null,
-    name: row.querySelector(".item-desc").value.trim(),
-    qty: Math.max(1, parseInt(row.querySelector(".item-qty").value, 10) || 1),
-    price: Math.max(0, parseFloat(row.querySelector(".item-price").value) || 0),
-    vatRate: parseFloat(row.querySelector(".item-vat").value) || 0,
+    productId: row.querySelector(".item-product-id")?.value || null,
+    name: row.querySelector(".item-desc")?.value.trim() || "",
+    qty: Math.max(1, parseInt(row.querySelector(".item-qty")?.value, 10) || 1),
+    price: Math.max(0, parseFloat(row.querySelector(".item-price")?.value) || 0),
+    vatRate: parseFloat(row.querySelector(".item-vat")?.value) || 0,
     _row: row
   }));
 }
@@ -1455,7 +1668,8 @@ function openPurchaseModal() {
   // Populate stock replenishment dropdown
   stockProdSelect.innerHTML = `<option value="">-- Ninguno (No modificar stock) --</option>`;
   allProducts.forEach(prod => {
-    stockProdSelect.innerHTML += `<option value="${escapeHtml(prod.id)}">${escapeHtml(prod.name)} (Stock actual: ${escapeHtml(prod.stock)})</option>`;
+    const codeTag = prod.code ? `[${escapeHtml(prod.code)}] ` : "";
+    stockProdSelect.innerHTML += `<option value="${escapeHtml(prod.id)}">${codeTag}${escapeHtml(prod.name)} (Stock actual: ${escapeHtml(prod.stock)})</option>`;
   });
 
   recalculatePurchaseTotal();

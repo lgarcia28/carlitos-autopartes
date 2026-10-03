@@ -800,6 +800,134 @@
       }
     }
 
+    /* Product Search Autocomplete in Sale Row */
+    .product-search-container {
+      position: relative;
+      width: 100%;
+    }
+    .product-search-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      max-height: 240px;
+      overflow-y: auto;
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      z-index: 1050;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-search-item {
+      padding: 9px 12px;
+      border-bottom: 1px solid #F1F5F9;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: background-color 0.15s ease;
+      text-align: left;
+    }
+    .product-search-item:last-child {
+      border-bottom: none;
+    }
+    .product-search-item:hover,
+    .product-search-item.active {
+      background-color: #F8FAFC;
+    }
+    .product-search-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .product-search-code-badge {
+      display: inline-block;
+      background: #E2E8F0;
+      color: #1E293B;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+    .product-search-item-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-search-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+    .product-stock-tag {
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+    .product-stock-tag.in-stock {
+      background: #DCFCE7;
+      color: #15803D;
+    }
+    .product-stock-tag.low-stock {
+      background: #FEF3C7;
+      color: #B45309;
+    }
+    .product-stock-tag.no-stock {
+      background: #FEE2E2;
+      color: #B91C1C;
+    }
+    .linked-product-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #EEF2FF;
+      border: 1px solid #C7D2FE;
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      color: #3730A3;
+      gap: 8px;
+    }
+    .pill-unlink-btn {
+      background: none;
+      border: none;
+      color: #DC2626;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+    .pill-unlink-btn:hover {
+      background: #FEE2E2;
+    }
+    .product-code-tag {
+      display: inline-block;
+      background: var(--bg-surface-low);
+      color: var(--primary-navy);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-light);
+      font-family: monospace;
+      margin-right: 4px;
+    }
+
     /* Voucher Print Styling */
     .voucher-container {
       background: white;
@@ -1454,9 +1582,15 @@
         <form id="product-form" class="admin-form">
           <input type="hidden" id="edit-product-id">
           
-          <div class="form-group">
-            <label for="prod-name" class="form-label">Nombre del Repuesto</label>
-            <input type="text" id="prod-name" class="form-control" placeholder="Ej. Faro Trasero Hilux 2020" required>
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label for="prod-name" class="form-label">Nombre del Repuesto</label>
+              <input type="text" id="prod-name" class="form-control" placeholder="Ej. Faro Trasero Hilux 2020" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="prod-code" class="form-label">Código / SKU</label>
+              <input type="text" id="prod-code" class="form-control" placeholder="Ej. OPT-01 o 100FAT">
+            </div>
           </div>
 
           <div class="form-group">
@@ -1965,6 +2099,6 @@
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
   <!-- Firebase Connection via script modules -->
-  <script type="module" src="control.js?v=15"></script>
+  <script type="module" src="control.js?v=16"></script>
 </body>
 </html>

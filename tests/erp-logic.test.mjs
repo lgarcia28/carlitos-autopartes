@@ -19,7 +19,8 @@ import {
   applyPayment,
   validateImputation,
   groupAccountBalances,
-  computeFinancialReport
+  computeFinancialReport,
+  filterProducts
 } from "../erp-logic.mjs";
 
 test("round2: rounds to 2 decimal places and handles float quirks", () => {
@@ -368,4 +369,84 @@ test("computeFinancialReport: accurately calculates tax position and cashflow", 
   assert.equal(rep.cashIn, 1910);
   assert.equal(rep.cashOut, 726);
   assert.equal(rep.cashNet, 1184);
+});
+
+test("filterProducts: searches by code, name, vehicle brand/model with accent & case insensitivity", () => {
+  const sampleProducts = [
+    {
+      id: "prod-1",
+      code: "OPT-HIL-16",
+      name: "Óptica Delantera Toyota Hilux 2016-2020",
+      brand: "Toyota",
+      model: "Hilux",
+      price: 94000,
+      stock: 4
+    },
+    {
+      id: "prod-2",
+      code: "ESP-GOL-12",
+      name: "Espejo Eléctrico Volkswagen Gol Trend",
+      brand: "Volkswagen",
+      model: "Gol Trend",
+      price: 38200,
+      stock: 6
+    },
+    {
+      id: "prod-3",
+      code: "100FAT060",
+      name: "Faro Trasero Peugeot 208 II 2020+",
+      brand: "Peugeot",
+      model: "208",
+      price: 78500,
+      stock: 0
+    },
+    {
+      id: "prod-4",
+      code: "TAZ-14-DEP",
+      name: "Juego de Tazas Rodado 14 Deportivo",
+      brand: "Universal",
+      model: "Todos",
+      price: 18500,
+      stock: 12
+    }
+  ];
+
+  // 1. Exact & partial code search
+  const byCodeExact = filterProducts(sampleProducts, "100FAT060");
+  assert.equal(byCodeExact.length, 1);
+  assert.equal(byCodeExact[0].id, "prod-3");
+
+  const byCodePrefix = filterProducts(sampleProducts, "OPT");
+  assert.equal(byCodePrefix.length, 1);
+  assert.equal(byCodePrefix[0].code, "OPT-HIL-16");
+
+  // 2. Accent-insensitive & case-insensitive description search
+  const byAccent = filterProducts(sampleProducts, "optica hilux");
+  assert.equal(byAccent.length, 1);
+  assert.equal(byAccent[0].id, "prod-1");
+
+  const byUppercase = filterProducts(sampleProducts, "ESPEJO");
+  assert.equal(byUppercase.length, 1);
+  assert.equal(byUppercase[0].id, "prod-2");
+
+  // 3. Search by vehicle brand / model
+  const byBrand = filterProducts(sampleProducts, "volkswagen");
+  assert.equal(byBrand.length, 1);
+  assert.equal(byBrand[0].id, "prod-2");
+
+  const byModel = filterProducts(sampleProducts, "208");
+  assert.equal(byModel.length, 1);
+  assert.equal(byModel[0].id, "prod-3");
+
+  // 4. Empty query returns list
+  const emptyQuery = filterProducts(sampleProducts, "");
+  assert.equal(emptyQuery.length, 4);
+
+  // 5. Non-matching query returns empty array
+  const noMatch = filterProducts(sampleProducts, "ferrari testarossa");
+  assert.equal(noMatch.length, 0);
+
+  // 6. Max results parameter
+  const limited = filterProducts(sampleProducts, "", 2);
+  assert.equal(limited.length, 2);
 });

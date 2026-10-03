@@ -334,3 +334,50 @@ export function computeFinancialReport({ invoices = [], payments = [], checks = 
 
   return { sales: s, purchases: p, taxBalance, cashIn, cashOut, cashNet: round2(cashIn - cashOut) };
 }
+
+/**
+ * Filtra y busca repuestos en el catálogo por código/SKU, nombre/descripción, marca o modelo.
+ * Insensible a mayúsculas, minúsculas y acentos.
+ * Si query está vacío, devuelve los primeros maxResults.
+ * Si query tiene texto, ordena priorizando coincidencias en código y nombre.
+ */
+export function filterProducts(products, query, maxResults = 25) {
+  if (!Array.isArray(products)) return [];
+  const q = normalizeName(query || "").trim();
+  if (!q) {
+    return products.slice(0, maxResults);
+  }
+
+  const terms = q.split(" ").filter(Boolean);
+
+  const scored = [];
+  for (const p of products) {
+    if (!p) continue;
+    const nameNorm = normalizeName(p.name || "");
+    const codeNorm = normalizeName(p.code || p.sku || "");
+    const idNorm = String(p.id || "").toLowerCase();
+    const brandNorm = normalizeName(p.brand || "");
+    const modelNorm = normalizeName(p.model || "");
+    const descNorm = normalizeName(p.description || "");
+
+    const fullSearchable = `${codeNorm} ${nameNorm} ${brandNorm} ${modelNorm} ${idNorm} ${descNorm}`;
+
+    const matchesAllTerms = terms.every(term => fullSearchable.includes(term));
+    if (!matchesAllTerms) continue;
+
+    let score = 0;
+    if (codeNorm === q) score += 100;
+    else if (codeNorm.startsWith(q)) score += 80;
+    else if (nameNorm.startsWith(q)) score += 60;
+    else if (codeNorm.includes(q)) score += 50;
+    else if (nameNorm.includes(q)) score += 40;
+    else if (brandNorm.includes(q) || modelNorm.includes(q)) score += 20;
+
+    if ((Number(p.stock) || 0) > 0) score += 5;
+
+    scored.push({ product: p, score });
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, maxResults).map(x => x.product);
+}
